@@ -7,34 +7,44 @@
 
 ;; NOTE: To run this test file, execute `(asdf:test-system :cl-lazy)' in your Lisp.
 
-(plan nil)
+(plan 4)
 
-#|
-(prove:subtest
-    "Test lazy evaluation" 
-  (prove:subtest
-     "Test if it is evaluated only once"
-    (let ((x (lazy (princ "first") (+ 100 200))))
-      (prove:is-print (force x) "first")
-      (prove:is-print (force x) "")))
- 
-  (prove:subtest
-      "Test if output is immutable"
-    (let ((x (lazy (print 'first) (+ 100 200))))
-      (prove:is (force x) 300)
-      (prove:is (force x) 300)))
-  
-  (prove:subtest
-      "Test lazy-car lazy-cdr"
-    (let ((x (lazy '(1 2 3))))
-      (prove:is (lazy-car x) 1)
-      (prove:is (lazy-cdr x) '(2 3))))
-  
-  (prove:subtest
-      "Test lazy-setf-cdr"
-    (let ((x (lazy '(1 2 3))))
-      (prove:is (lazy-setf-cdr x) '(2 3))
-      (prove:is (force x) '(2 3)))))
-|#
+(subtest
+    "Test if it is evaluated only once"
+  (let ((x (lazy (princ "first") (+ 100 200))))
+    (is-print (force x) "first")
+    (is-print (force x) "")))
+
+(subtest
+    "Test if output is immutable"
+ (let ((x (lazy (print 'first) (+ 100 200))))
+   (is (force x) 300)
+   (is (force x) 300)))
+
+(subtest
+    "Test lcons, lcar & lcdr"
+  (subtest
+      "Test in 2 elements"
+    (let ((lst (lcons (progn (princ "a") 1)
+		      (lcons (progn (princ "b") 2) nil)))
+	  (res nil))
+      (is-print (setf res (lcar lst)) "a")
+      (is res 1)
+      (is-print (setf res (lcar (lcdr lst))) "b")
+      (is res 2))))
+
+(subtest
+    "Test llist, lnth"
+  (let ((lst (llist 1 (progn (princ "b") 2) 3))
+	(res nil))
+    (is (lnth -1 lst) 1)
+    (is (lnth 0 lst) 1)
+    (is-print (setf res (lnth 2 lst)) "b")
+    (is res 3)
+    (is-print (setf res (lnth 1 lst)) "")
+    (is res 2)
+    
+    (ok (null (lnth 3 lst)))
+    (ok (null (lnth 10 lst)))))
 
 (finalize)
