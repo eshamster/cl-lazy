@@ -7,7 +7,7 @@
 
 ;; NOTE: To run this test file, execute `(asdf:test-system :cl-lazy)' in your Lisp.
 
-(plan 4)
+(plan 5)
 
 (subtest
     "Test if it is evaluated only once"
@@ -46,5 +46,18 @@
     
     (ok (null (lnth 3 lst)))
     (ok (null (lnth 10 lst)))))
+
+(subtest
+    "Test make-number-series"
+  (labels ((test-series (l-lst test-len expected)
+	     (let ((lst nil))
+	       (dotimes (i test-len)
+		 (setf lst (cons (lnth i l-lst) lst)))
+	       (setf lst (reverse lst))
+	       (is lst expected :test #'equalp))))
+    (test-series (make-number-series nil (* (1+ n) 2)) 5 '(2 4 6 8 10))
+    (test-series (make-number-series (0 1) (+ (lnth (- n 1) a) (lnth (- n 2) a)))
+		 10
+		 '(0 1 1 2 3 5 8 13 21 34))))
 
 (finalize)
