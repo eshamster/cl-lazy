@@ -7,7 +7,7 @@
 
 ;; NOTE: To run this test file, execute `(asdf:test-system :cl-lazy)' in your Lisp.
 
-(plan 5)
+(plan 6)
 
 (subtest
     "Test if it is evaluated only once"
@@ -47,17 +47,33 @@
     (ok (null (lnth 3 lst)))
     (ok (null (lnth 10 lst)))))
 
+(defun is-series (l-lst test-len expected)
+  (let ((lst nil))
+    (dotimes (i test-len)
+      (setf lst (cons (lnth i l-lst) lst)))
+    (setf lst (reverse lst))
+    (is lst expected :test #'equalp)))
+
 (subtest
     "Test make-number-series"
-  (labels ((test-series (l-lst test-len expected)
-	     (let ((lst nil))
-	       (dotimes (i test-len)
-		 (setf lst (cons (lnth i l-lst) lst)))
-	       (setf lst (reverse lst))
-	       (is lst expected :test #'equalp))))
-    (test-series (make-number-series nil (* (1+ n) 2)) 5 '(2 4 6 8 10))
-    (test-series (make-number-series (0 1) (+ (lnth (- n 1) a) (lnth (- n 2) a)))
-		 10
-		 '(0 1 1 2 3 5 8 13 21 34))))
+  (is-series (make-number-series nil (* (1+ n) 2)) 5 '(2 4 6 8 10))
+  (is-series (make-number-series (0 1) (+ (lnth (- n 1) a) (lnth (- n 2) a)))
+	     10
+	     '(0 1 1 2 3 5 8 13 21 34)))
+
+(defparameter *old-table* (lexport-readtable))
+(subtest
+    "Test lexport-readtable"
+  (is-expand #{a (+ n 1)} (lnth (+ n 1) a))
+  (is-expand #[1 + 2] (+ 1 2))
+  
+  (is-series (make-number-series (0 1) (+ #{a #[n - 1]} #{a #[n - 2]}))
+	     10
+	     '(0 1 1 2 3 5 8 13 21 34))
+
+  (subtest
+      "Test unexporting readtable"
+    (setf *readtable* *old-table*)
+    (ok (not (get-dispatch-macro-character #\# #\{)))))
 
 (finalize)
