@@ -55,9 +55,9 @@
     (is lst expected :test #'equalp)))
 
 (subtest
-    "Test make-number-series"
-  (is-series (make-number-series nil (* (1+ .n) 2)) 5 '(2 4 6 8 10))
-  (is-series (make-number-series (0 1) (+ (lnth (- .n 1) .a) (lnth (- .n 2) .a)))
+    "Test make-series"
+  (is-series (make-series nil (* (1+ .n) 2)) 5 '(2 4 6 8 10))
+  (is-series (make-series (0 1) (+ (lnth (- .n 1) .a) (lnth (- .n 2) .a)))
 	     10
 	     '(0 1 1 2 3 5 8 13 21 34)))
 
@@ -67,7 +67,7 @@
   (is-expand #{a (+ n 1)} (lnth (+ n 1) a))
   (is-expand #[1 + 2] (+ 1 2))
   
-  (is-series (make-number-series (0 1) (+ #{.a #[.n - 1]} #{.a #[.n - 2]}))
+  (is-series (make-series (0 1) (+ #{.a #[.n - 1]} #{.a #[.n - 2]}))
 	     10
 	     '(0 1 1 2 3 5 8 13 21 34))
 

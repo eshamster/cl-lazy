@@ -61,13 +61,13 @@
 
 #|
 Ex1. Series of even numbers -> [0, 2, 4, 6, ...]
-  (make-number-series nil (* .n 2))
+  (make-series nil (* .n 2))
 
 Ex2. Fibonacci series -> [0, 1, 1, 2, 3, 5, 8, 13, ...]
-  (make-number-series (0 1) (+ (lnth (- .n 1) .a) (lnth (- .n 2) .a)))
+  (make-series (0 1) (+ (lnth (- .n 1) .a) (lnth (- .n 2) .a)))
 |#
 @export
-(defmacro make-number-series (init-nums &body body)
+(defmacro make-series (init-nums &body body)
   (let ((f (gensym)))
     `(let ((.a nil))
        (labels ((,f (.n) (lcons (progn ,@body) (,f (1+ .n)))))
