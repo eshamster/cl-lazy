@@ -7,7 +7,7 @@
 
 ;; NOTE: To run this test file, execute `(asdf:test-system :cl-lazy)' in your Lisp.
 
-(plan 6)
+(plan 7)
 
 (subtest
     "Test if it is evaluated only once"
@@ -70,10 +70,18 @@
   (is-series (make-series (0 1) (+ #{.a #[.n - 1]} #{.a #[.n - 2]}))
 	     10
 	     '(0 1 1 2 3 5 8 13 21 34))
-
   (subtest
       "Test unexporting readtable"
     (setf *readtable* *old-table*)
     (ok (not (get-dispatch-macro-character #\# #\{)))))
+
+(subtest
+    "Test concat-series"
+  (let ((an (make-series nil (* .n 2)))
+	(bn (make-series nil (* .n 3)))
+	(cn (make-series nil (* .n 5))))
+    (is-series (concat-series #'(lambda (a b c) (list a b c)) an bn cn)
+	       4
+	       '((0 0 0 ) (2 3 5) (4 6 10) (6 9 15)))))
 
 (finalize)

@@ -76,6 +76,21 @@ Ex2. Fibonacci series -> [0, 1, 1, 2, 3, 5, 8, 13, ...]
 (defmacro llist-with-tail (tail &rest rest)
   `,(llist-body rest :tail tail))
 
+#|
+Utils
+|#
+
+@export
+(defmacro concat-series (fn-concat &rest some-series)
+  `(make-series nil
+     (funcall ,fn-concat
+	      ,@(mapcar #'(lambda (series)
+			    `(lnth .n ,series))
+			some-series))))
+
+#|
+Reader Macro
+|#
 @export
 (defun lexport-readtable ()
   (let ((old-table (copy-readtable *readtable*)))
@@ -105,4 +120,3 @@ Ex2. Fibonacci series -> [0, 1, 1, 2, 3, 5, 8, 13, ...]
 	   `(,(cadr tri) ,(car tri) ,(caddr tri))))
      table)
     table))
-
