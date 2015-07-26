@@ -7,7 +7,7 @@
 
 ;; NOTE: To run this test file, execute `(asdf:test-system :cl-lazy)' in your Lisp.
 
-(plan 7)
+(plan 8)
 
 (subtest
     "Test if it is evaluated only once"
@@ -58,6 +58,13 @@
     "Test make-series"
   (is-series (make-series nil (* (1+ .n) 2)) 5 '(2 4 6 8 10))
   (is-series (make-series (0 1) (+ (lnth (- .n 1) .a) (lnth (- .n 2) .a)))
+	     10
+	     '(0 1 1 2 3 5 8 13 21 34)))
+
+(subtest
+    "Test make-series-fn"
+  (is-series (make-series-fn nil #'(lambda (a n) (* (1+ n) 2))) 5 '(2 4 6 8 10))
+  (is-series (make-series-fn '(0 1) #'(lambda (a n) (+ (lnth (- n 1) a) (lnth (- n 2) a))))
 	     10
 	     '(0 1 1 2 3 5 8 13 21 34)))
 

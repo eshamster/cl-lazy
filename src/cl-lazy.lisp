@@ -73,6 +73,16 @@ Ex2. Fibonacci series -> [0, 1, 1, 2, 3, 5, 8, 13, ...]
        (labels ((,f (.n) (lcons (progn ,@body) (,f (1+ .n)))))
 	 (setf .a (llist-with-tail (,f ,(length init-nums)) ,@init-nums))))))
 
+@export
+(defun make-series-fn (init-nums fn-calc)
+  (let ((a nil))
+    (labels ((f (n) (lcons (funcall fn-calc a n) (f (1+ n))))
+	     (recursive-cons (lst tail)
+	       (if (null lst)
+		   tail
+		   (lcons (car lst) (recursive-cons (cdr lst) tail)))))
+      (setf a (recursive-cons init-nums (f (length init-nums)))))))
+
 (defmacro llist-with-tail (tail &rest rest)
   `,(llist-body rest :tail tail))
 
