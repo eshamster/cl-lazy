@@ -63,7 +63,7 @@
 
 (subtest
     "Test make-series-fn"
-  (is-series (make-series-fn nil #'(lambda (a n) (* (1+ n) 2))) 5 '(2 4 6 8 10))
+  (is-series (make-series-fn nil #'(lambda (a n) (declare (ignore a)) (* (1+ n) 2))) 5 '(2 4 6 8 10))
   (is-series (make-series-fn '(0 1) #'(lambda (a n) (+ (lnth (- n 1) a) (lnth (- n 2) a))))
 	     10
 	     '(0 1 1 2 3 5 8 13 21 34)))
