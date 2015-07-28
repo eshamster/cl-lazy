@@ -72,8 +72,10 @@ Ex2. Fibonacci series -> [0, 1, 1, 2, 3, 5, 8, 13, ...]
     `(let ((.a nil))
        (declare (ignorable .a))
        (labels ((,f (.n)
-		  (declare (ignorable .n))
-		  (lcons (progn ,@body) (,f (1+ .n)))))
+		  (symbol-macrolet ((a .a)
+				    (n .n))
+		    (declare (ignorable .n))
+		    (lcons (progn ,@body) (,f (1+ .n))))))
 	 (setf .a (llist-with-tail (,f ,(length init-nums)) ,@init-nums))))))
 
 @export
@@ -111,25 +113,39 @@ Reader Macro
     old-table))
 
 (defun add-readtable ()
-  (let ((table (copy-readtable *readtable*)))
+  (let ((*readtable* (copy-readtable *readtable*)))
     ; #{a n} -> (lnth n a)
-    (set-macro-character #\} (get-macro-character #\)) nil table)
+    (set-macro-character #\} (get-macro-character #\)))
     (set-dispatch-macro-character
      #\# #\{
      #'(lambda (stream &rest rest)
 	 (declare (ignore rest))
-	 (let ((pair (read-delimited-list #\} stream t)))
-	   `(lnth ,(cadr pair) ,(car pair))))
-     table)
+	 (let ((*readtable* (copy-readtable *readtable*))
+		(pair nil))
+	   (set-macro-character #\[ #'[-reader)
+	   (setf pair (read-delimited-list #\} stream t))
+	   `(lnth ,(cadr pair) ,(car pair)))))
 
-    ; #[a b c] -> (b a c)
-    ; Ex. #[n + 1] -> (+ n 1)
-    (set-macro-character #\] (get-macro-character #\)) nil table)
-    (set-dispatch-macro-character
-     #\# #\[
-     #'(lambda (stream &rest rest)
-	 (declare (ignore rest))
-	 (let ((tri (read-delimited-list #\] stream t)))
-	   `(,(cadr tri) ,(car tri) ,(caddr tri))))
-     table)
-    table))
+    (set-dispatch-macro-character #\# #\[ #'[-reader)
+    *readtable*))
+
+(defun [-reader (stream &rest rest)
+  (declare (ignore rest))
+  (let ((lst nil)
+	(*readtable* (copy-readtable *readtable*)))
+    (set-separate-character #\-)
+    (set-separate-character #\*)
+    (set-macro-character #\] (get-macro-character #\)))
+    (setf lst (read-delimited-list #\] stream t))
+    (case (length lst)
+      (1 (car lst))
+      (3 (case (cadr lst)
+	   (#\- `(- ,(car lst) ,(caddr lst)))
+	   (#\* `(* ,(car lst) ,(caddr lst)))))
+      (t (error 'simple-error)))))
+  
+(defun set-separate-character (char)
+  (set-macro-character char
+		       #'(lambda (s c)
+			   (declare (ignore s c))
+			   char)))
