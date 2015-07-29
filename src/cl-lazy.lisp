@@ -72,10 +72,8 @@ Ex2. Fibonacci series -> [0, 1, 1, 2, 3, 5, 8, 13, ...]
     `(let ((.a nil))
        (declare (ignorable .a))
        (labels ((,f (.n)
-		  (symbol-macrolet ((a .a)
-				    (n .n))
-		    (declare (ignorable .n))
-		    (lcons (progn ,@body) (,f (1+ .n))))))
+		  (declare (ignorable .n))
+		  (lcons (progn ,@body) (,f (1+ .n)))))
 	 (setf .a (llist-with-tail (,f ,(length init-nums)) ,@init-nums))))))
 
 @export
