@@ -112,18 +112,18 @@ Reader Macro
   (let ((*readtable* (copy-readtable *readtable*)))
     ; #{a n} -> (lnth n a)
     (set-macro-character #\} (get-macro-character #\)))
-    (set-dispatch-macro-character
-     #\# #\{
-     #'(lambda (stream &rest rest)
-	 (declare (ignore rest))
-	 (let ((*readtable* (copy-readtable *readtable*))
-		(pair nil))
-	   (set-macro-character #\[ #'[-reader)
-	   (setf pair (read-delimited-list #\} stream t))
-	   `(lnth ,(cadr pair) ,(car pair)))))
-
+    (set-dispatch-macro-character #\# #\{ #'{-reader)
     (set-dispatch-macro-character #\# #\[ #'[-reader)
     *readtable*))
+
+(defun {-reader (stream &rest rest)
+  (declare (ignore rest))
+  (let ((*readtable* (copy-readtable *readtable*))
+	(pair nil))
+    (set-macro-character #\[ #'[-reader)
+    (setf pair (read-delimited-list #\} stream t))
+    `(lnth ,(cadr pair) ,(car pair))))
+  
 
 (defun [-reader (stream &rest rest)
   (declare (ignore rest))
