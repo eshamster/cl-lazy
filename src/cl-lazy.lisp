@@ -64,7 +64,7 @@ Ex1. Series of even numbers -> [0, 2, 4, 6, ...]
   (make-series nil (* .n 2))
 
 Ex2. Fibonacci series -> [0, 1, 1, 2, 3, 5, 8, 13, ...]
-  (make-series (0 1) (+ (lnth (- .n 1) .a) (lnth (- .n 2) .a)))
+  (make-series '(0 1) (+ (lnth (- .n 1) .a) (lnth (- .n 2) .a)))
 |#
 @export
 (defmacro make-series (init-nums &body body)
@@ -74,20 +74,18 @@ Ex2. Fibonacci series -> [0, 1, 1, 2, 3, 5, 8, 13, ...]
        (labels ((,f (.n)
 		  (declare (ignorable .n))
 		  (lcons (progn ,@body) (,f (1+ .n)))))
-	 (setf .a (llist-with-tail (,f ,(length init-nums)) ,@init-nums))))))
+	 (setf .a (recursive-lcons ,init-nums (,f (length ,init-nums))))))))
 
 @export
 (defun make-series-fn (init-nums fn-calc)
   (let ((a nil))
-    (labels ((f (n) (lcons (funcall fn-calc a n) (f (1+ n))))
-	     (recursive-cons (lst tail)
-	       (if (null lst)
-		   tail
-		   (lcons (car lst) (recursive-cons (cdr lst) tail)))))
-      (setf a (recursive-cons init-nums (f (length init-nums)))))))
+    (labels ((f (n) (lcons (funcall fn-calc a n) (f (1+ n)))))
+      (setf a (recursive-lcons init-nums (f (length init-nums)))))))
 
-(defmacro llist-with-tail (tail &rest rest)
-  `,(llist-body rest :tail tail))
+(defun recursive-lcons (lst tail)
+  (if (null lst)
+      tail
+      (lcons (car lst) (recursive-lcons (cdr lst) tail))))
 
 #|
 Utils
