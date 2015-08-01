@@ -80,6 +80,15 @@
   (is-series (make-series '(0 1) (+ #{.a [.n-1]} #{.a [.n-2]}))
 	     10
 	     '(0 1 1 2 3 5 8 13 21 34))
+
+  (subtest
+      "Test #<>"
+    (is-expand #<a[n] = (+ (* a[n-1] 2) a[n-2])>
+	       #'(lambda (a n) (+ (* (lnth (- n 1) a) 2) (lnth (- n 2) a))))
+    (is-series (make-series-fn '(0 1) #<a[n] = (+ a[n-1] a[n-2])>)
+	       10
+	       '(0 1 1 2 3 5 8 13 21 34)))
+  
   (subtest
       "Test unexporting readtable"
     (setf *readtable* *old-table*)
