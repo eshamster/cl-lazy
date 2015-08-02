@@ -83,9 +83,13 @@
 
   (subtest
       "Test #<>"
-    (is-expand #<a[n] = (+ (* a[n-1] 2) a[n-2])>
-	       #'(lambda (a n) (+ (* (lnth (- n 1) a) 2) (lnth (- n 2) a))))
-    (is-series (make-series-fn '(0 1) #<a[n] = (+ a[n-1] a[n-2])>)
+    (is-expand #<a[n] = (* n 2)>
+	       (make-series-fn nil #'(lambda (a n) (declare (ignorable a n)) (* n 2))))
+    (is-expand #<a[n] = 0, 1, (+ (* a[n-1] 2) a[n-2])>
+	       (make-series-fn '(0 1) #'(lambda (a n)
+				       (declare (ignorable a n))
+				       (+ (* (lnth (- n 1) a) 2) (lnth (- n 2) a)))))
+    (is-series #<a[n] = 0, 1, (+ a[n-1] a[n-2])>
 	       10
 	       '(0 1 1 2 3 5 8 13 21 34)))
   
