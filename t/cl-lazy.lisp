@@ -72,10 +72,15 @@
 (subtest
     "Test lexport-readtable"
   (is-expand #{a (+ n 1)} (lnth (+ n 1) a))
-  (is-expand #[1-2] (- 1 2))
+  (is-expand #[1] 1)
   (is-expand #[1*2] (* 1 2))
+  (is-expand #[1+2] (+ 1 2))
+  (is-expand #[1/2] (/ 1 2))
   (is-expand #[1 - 2] (- 1 2))
   (is-expand #[1 * 2] (* 1 2))
+  
+  (is-expand #{a[n-1]} (lnth (- n 1) a))
+  (is-expand #{a[n-1][m]} (lnth m (lnth (- n 1) a)))
   
   (is-series (make-series '(0 1) (+ #{.a [.n-1]} #{.a [.n-2]}))
 	     10
