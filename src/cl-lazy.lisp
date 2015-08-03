@@ -147,7 +147,7 @@ Reader Macro
       (let* ((splitted (split-by-last buf #\,))
 	     (init-list (remove #\, (car splitted)))
 	     (body-list (cadr splitted)))
-	`(make-series-fn ,(if (null init-list) nil `',init-list)
+	`(make-series-fn ,(if (null init-list) nil `(list ,@init-list))
 			 #'(lambda (,a ,n)
 			     (declare (ignorable ,a ,n))
 			     ,@(sort-ref-series body-list)))))))
