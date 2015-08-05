@@ -7,7 +7,7 @@
 
 ;; NOTE: To run this test file, execute `(asdf:test-system :cl-lazy)' in your Lisp.
 
-(plan 8)
+(plan 7)
 
 (subtest
     "Test if it is evaluated only once"
@@ -56,15 +56,8 @@
 
 (subtest
     "Test make-series"
-  (is-series (make-series nil (* (1+ .n) 2)) 5 '(2 4 6 8 10))
-  (is-series (make-series '(0 1) (+ (lnth (- .n 1) .a) (lnth (- .n 2) .a)))
-	     10
-	     '(0 1 1 2 3 5 8 13 21 34)))
-
-(subtest
-    "Test make-series-fn"
-  (is-series (make-series-fn nil #'(lambda (a n) (declare (ignore a)) (* (1+ n) 2))) 5 '(2 4 6 8 10))
-  (is-series (make-series-fn '(0 1) #'(lambda (a n) (+ (lnth (- n 1) a) (lnth (- n 2) a))))
+  (is-series (make-series nil #'(lambda (a n) (declare (ignore a)) (* (1+ n) 2))) 5 '(2 4 6 8 10))
+  (is-series (make-series '(0 1) #'(lambda (a n) (+ (lnth (- n 1) a) (lnth (- n 2) a))))
 	     10
 	     '(0 1 1 2 3 5 8 13 21 34)))
 
@@ -82,19 +75,19 @@
   (is-expand #{a[n-1]} (lnth (- n 1) a))
   (is-expand #{a[n-1][m]} (lnth m (lnth (- n 1) a)))
   
-  (is-series (make-series '(0 1) (+ #{.a [.n-1]} #{.a [.n-2]}))
+  (is-series (make-series '(0 1) #'(lambda (a n) (+ #{a[n-1]} #{a[n-2]})))
 	     10
 	     '(0 1 1 2 3 5 8 13 21 34))
 
   (subtest
       "Test #<>"
     (is-expand #<a[n] = (* n 2)>
-	       (make-series-fn nil #'(lambda (a n) (declare (ignorable a n)) (* n 2))))
+	       (make-series nil #'(lambda (a n) (declare (ignorable a n)) (* n 2))))
     (is-expand #<a[n] = 0, 1, (+ (* a[n-1] 2) a[n-2])>
-	       (make-series-fn (list 0 1) #'(lambda (a n)
+	       (make-series (list 0 1) #'(lambda (a n)
 				       (declare (ignorable a n))
 				       (+ (* (lnth (- n 1) a) 2) (lnth (- n 2) a)))))
-    (is-series #<a[n] = 0, 1, (+ a[n-1] a[n-2])>
+    (is-series #<b[k] = 0, 1, (+ b[k-1] b[k-2])>
 	       10
 	       '(0 1 1 2 3 5 8 13 21 34)))
   
@@ -103,13 +96,16 @@
     (setf *readtable* *old-table*)
     (ok (not (get-dispatch-macro-character #\# #\{)))))
 
+
+(lexport-readtable)
 (subtest
     "Test concat-series"
-  (let ((an (make-series nil (* .n 2)))
-	(bn (make-series nil (* .n 3)))
-	(cn (make-series nil (* .n 5))))
+  (let ((an #<a[n] = (* n 2)>)
+	(bn #<a[n] = (* n 3)>)
+	(cn #<a[n] = (* n 5)>))
     (is-series (concat-series #'(lambda (a b c) (list a b c)) an bn cn)
 	       4
 	       '((0 0 0 ) (2 3 5) (4 6 10) (6 9 15)))))
+(setf *readtable* *old-table*)
 
 (finalize)

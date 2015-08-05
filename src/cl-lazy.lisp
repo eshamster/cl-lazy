@@ -61,23 +61,13 @@
 
 #|
 Ex1. Series of even numbers -> [0, 2, 4, 6, ...]
-  (make-series nil (* .n 2))
+  (make-series nil #'(lambda (a n) (* n 2)))
 
 Ex2. Fibonacci series -> [0, 1, 1, 2, 3, 5, 8, 13, ...]
-  (make-series '(0 1) (+ (lnth (- .n 1) .a) (lnth (- .n 2) .a)))
+  (make-series '(0 1) #'(lambda (a n) (+ (lnth (- n 1) a) (lnth (- n 2) a)))
 |#
 @export
-(defmacro make-series (init-nums &body body)
-  (let ((f (gensym)))
-    `(let ((.a nil))
-       (declare (ignorable .a))
-       (labels ((,f (.n)
-		  (declare (ignorable .n))
-		  (lcons (progn ,@body) (,f (1+ .n)))))
-	 (setf .a (recursive-lcons ,init-nums (,f (length ,init-nums))))))))
-
-@export
-(defun make-series-fn (init-nums fn-calc)
+(defun make-series (init-nums fn-calc)
   (let ((a nil))
     (labels ((f (n) (lcons (funcall fn-calc a n) (f (1+ n)))))
       (setf a (recursive-lcons init-nums (f (length init-nums)))))))
@@ -90,14 +80,18 @@ Ex2. Fibonacci series -> [0, 1, 1, 2, 3, 5, 8, 13, ...]
 #|
 Utils
 |#
-
 @export
 (defmacro concat-series (fn-concat &rest some-series)
-  `(make-series nil
-     (funcall ,fn-concat
-	      ,@(mapcar #'(lambda (series)
-			    `(lnth .n ,series))
-			some-series))))
+  (let ((a (gensym))
+	(n (gensym)))
+    `(make-series
+      nil
+      #'(lambda (,a ,n)
+	  (declare (ignore ,a))
+	  (funcall ,fn-concat
+		   ,@(mapcar #'(lambda (series)
+				 `(lnth ,n ,series))
+			     some-series))))))
 
 #|
 Reader Macro
@@ -147,10 +141,10 @@ Reader Macro
       (let* ((splitted (split-by-last buf #\,))
 	     (init-list (remove #\, (car splitted)))
 	     (body-list (cadr splitted)))
-	`(make-series-fn ,(if (null init-list) nil `(list ,@init-list))
-			 #'(lambda (,a ,n)
-			     (declare (ignorable ,a ,n))
-			     ,@(sort-ref-series body-list)))))))
+	`(make-series ,(if (null init-list) nil `(list ,@init-list))
+		      #'(lambda (,a ,n)
+			  (declare (ignorable ,a ,n))
+			  ,@(sort-ref-series body-list)))))))
 
 (defun split-list (lst index)
   (labels ((extract-first (rest-lst now-index res)
