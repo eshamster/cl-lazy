@@ -89,7 +89,13 @@
 				       (+ (* (lnth (- n 1) a) 2) (lnth (- n 2) a)))))
     (is-series #<b[k] = 0, 1, (+ b[k-1] b[k-2])>
 	       10
-	       '(0 1 1 2 3 5 8 13 21 34)))
+	       '(0 1 1 2 3 5 8 13 21 34))
+    (subtest
+	"Test the format of x[y] can be used in initial values"
+      (let ((x #<a[n] = (* (1+ n) 2)>))
+	(is-series #<b[k] = x[0], (* b[k-1] 2)>
+		   5
+		   '(2 4 8 16 32)))))
   
   (subtest
       "Test unexporting readtable"
