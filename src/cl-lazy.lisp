@@ -1,3 +1,6 @@
+#|--------
+  Basic
+  --------|#
 (in-package :cl-user)
 (defpackage cl-lazy
   (:use :cl)
@@ -77,9 +80,9 @@ Ex2. Fibonacci series -> [0, 1, 1, 2, 3, 5, 8, 13, ...]
       tail
       (lcons (car lst) (recursive-lcons (cdr lst) tail))))
 
-#|
-Utils
-|#
+#|-------
+   Utils
+  -------|#
 @export
 (defmacro concat-series (fn-concat &rest some-series)
   (let ((a (gensym))
@@ -93,9 +96,9 @@ Utils
 				 `(lnth ,n ,series))
 			     some-series))))))
 
-#|
-Reader Macro
-|#
+#|-------------
+  Reader Macro
+  -------------|#
 @export
 (defun lexport-readtable ()
   (let ((old-table (copy-readtable *readtable*)))
@@ -109,6 +112,8 @@ Reader Macro
     (set-dispatch-macro-character #\# #\[ #'[-reader)
     *readtable*))
 
+; This enables to make a series as
+; #<a[n] = 0, 1, (+ a[n-1] a[n-2])>
 (defun <-reader (stream &rest rest)
   (declare (ignore rest))
   (let ((*readtable* (copy-readtable *readtable*))
@@ -128,6 +133,11 @@ Reader Macro
     (set-separate-character #\,)
     (setf buf (read-delimited-list #\> stream t))
     (labels ((sort-ref-series (buf)
+	       #|
+	       Basically this function traces the list recursively
+	       and only reconstructs the same list.
+	       But if finds (#\[ (a b)), sorts this to (lnth b a).
+	       |#
 	       (let ((res nil))
 		 (dolist (elem buf)
 		   (if (listp elem)
@@ -178,7 +188,7 @@ Reader Macro
 		   `(lnth ,(car lst) ,(recursive-lnth (cdr lst))))))
       (recursive-lnth (reverse pair)))))
   
-
+; Ex. #[n-1] -> (- n 1)
 (defun [-reader (stream &rest rest)
   (declare (ignore rest))
   (let ((lst nil)
