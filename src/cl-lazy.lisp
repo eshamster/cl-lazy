@@ -157,22 +157,13 @@ Ex2. Fibonacci series -> [0, 1, 1, 2, 3, 5, 8, 13, ...]
 			  ,@(sort-ref-series body-list)))))))
 
 (defun split-list (lst index)
-  (labels ((extract-first (rest-lst now-index res)
-	     (if (or (null rest-lst) (> now-index index))
-		 (reverse res) 
-		 (extract-first (cdr rest-lst) (1+ now-index) (cons (car rest-lst) res)))))
-    (let ((first (extract-first lst 0 nil))
-	  (last (nthcdr (max 0 (1+ index)) lst)))
-      (list first last))))
+  (let ((target (if (null index) 0 (1+ index))))
+    (list (subseq lst 0 target)
+	  (nthcdr target lst))))
 
 (defun split-by-last (lst delimiter)
-  (let ((now-index 0)
-	(last-index -1))
-    (dolist (elem lst)
-      (if (eq elem delimiter)
-	  (setf last-index now-index))
-      (incf now-index))
-    (split-list lst last-index)))
+  (split-list lst
+	      (position delimiter lst :from-end t)))
 
 ; #{a n} -> (lnth n a)
 (defun {-reader (stream &rest rest)
