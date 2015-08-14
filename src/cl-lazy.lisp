@@ -3,8 +3,7 @@
   --------|#
 (in-package :cl-user)
 (defpackage cl-lazy
-  (:use :cl)
-  (:export #:.a #:.n))
+  (:use :cl))
 (in-package :cl-lazy)
 
 (cl-annot:enable-annot-syntax)
