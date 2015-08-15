@@ -7,7 +7,7 @@
 
 ;; NOTE: To run this test file, execute `(asdf:test-system :cl-lazy)' in your Lisp.
 
-(plan 7)
+(plan 8)
 
 (subtest
     "Test if it is evaluated only once"
@@ -34,18 +34,29 @@
       (is res 2))))
 
 (subtest
-    "Test llist, lnth"
-  (let ((lst (llist 1 (progn (princ "b") 2) 3))
+    "Test llist, llist-to-list"
+  (let ((llst (llist 1 (progn (princ "b") 2) 3))
 	(res nil))
-    (is (lnth -1 lst) 1)
-    (is (lnth 0 lst) 1)
-    (is-print (setf res (lnth 2 lst)) "b")
-    (is res 3)
-    (is-print (setf res (lnth 1 lst)) "")
-    (is res 2)
+    (is-print (setf res (llist-to-list llst)) "b")
+    (is res '(1 2 3) :test #'equalp)
+    (is-print (setf res (llist-to-list llst)) "")
+    (is res '(1 2 3) :test #'equalp)
     
-    (ok (null (lnth 3 lst)))
-    (ok (null (lnth 10 lst)))))
+    (is (llist-to-list llst :max-length -1) '(1 2 3))
+    (is (llist-to-list llst :max-length  0) nil)
+    (is (llist-to-list llst :max-length  1) '(1))
+    (is (llist-to-list llst :max-length  2) '(1 2))
+    (is (llist-to-list llst :max-length  3) '(1 2 3))
+    (is (llist-to-list llst :max-length  100) '(1 2 3))))
+
+(subtest
+    "Test lnth, lnthcdr"
+  (let ((llst (llist 1 2 3)))
+    (is (lnth -1 llst) 1)
+    (is (lnth 0 llst) 1)
+    
+    (ok (null (lnth 3 llst)))
+    (ok (null (lnth 10 llst)))))
 
 (defun is-series (l-lst test-len expected)
   (let ((lst nil))

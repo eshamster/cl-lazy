@@ -53,13 +53,26 @@
 		 (f (cons 'lcons (list (car rest-arg) llst)) (cdr rest-arg)))))
     (f tail (reverse lst))))
 
+@export
+(defun llist-to-list (llist &key (max-length -1))
+  (labels ((f (lst rest-llist rest-length)
+	     (if (or (null rest-llist)
+		     (and (>= max-length 0) (<= rest-length 0)))
+		 lst
+		 (f (cons (lcar rest-llist) lst)
+		    (lcdr rest-llist)
+		    (1- rest-length)))))
+    (reverse (f nil llist max-length))))
 
 @export
 (defun lnth (n l-lst)
-  (if (<= n 0)
-      (lcar l-lst)
-      (lnth (1- n) (lcdr l-lst))))
+  (lcar (lnthcdr n l-lst)))
 
+@export
+(defun lnthcdr (n l-lst)
+  (if (<= n 0)
+      l-lst
+      (lnthcdr (1- n) (lcdr l-lst))))
 
 #|
 Ex1. Series of even numbers -> [0, 2, 4, 6, ...]
