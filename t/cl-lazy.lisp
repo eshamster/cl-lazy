@@ -7,7 +7,7 @@
 
 ;; NOTE: To run this test file, execute `(asdf:test-system :cl-lazy)' in your Lisp.
 
-(plan 8)
+(plan 9)
 
 (subtest
     "Test if it is evaluated only once"
@@ -48,6 +48,12 @@
     (is (llist-to-list llst :max-length  2) '(1 2))
     (is (llist-to-list llst :max-length  3) '(1 2 3))
     (is (llist-to-list llst :max-length  100) '(1 2 3))))
+
+(subtest
+    "Test do-llist"
+  (let ((llst (llist 1 2 nil nil 5 nil)))
+    (is-print (do-llist (val llst) (format t "~A " val))
+	      "1 2 NIL NIL 5 NIL ")))
 
 (subtest
     "Test lnth, lnthcdr"
