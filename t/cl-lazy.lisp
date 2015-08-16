@@ -7,7 +7,7 @@
 
 ;; NOTE: To run this test file, execute `(asdf:test-system :cl-lazy)' in your Lisp.
 
-(plan 10)
+(plan 11)
 
 (subtest
     "Test if it is evaluated only once"
@@ -134,7 +134,29 @@
 	       (cn #<a[n] = (* n 5)>))
 	   (is-series (concat-series #'(lambda (a b c) (list a b c)) an bn cn)
 		      4
-		      '((0 0 0 ) (2 3 5) (4 6 10) (6 9 15))))))
+		      '((0 0 0 ) (2 3 5) (4 6 10) (6 9 15)))))
+       (subtest
+	   "Test filter-seires & filter-series-with-little"
+	 (let ((a #<a [n] = n>))
+	   (is-series (filter-series #'oddp a)
+		      5
+		      '(1 3 5 7 9))
+	   (is-series (filter-series
+		       #'(lambda (val)
+			   (= (mod val 100) 20))
+		       a
+		       :give-up-distance 50)
+		      3
+		      '(20 nil nil))
+	   (is-series (filter-series-using-little
+		       #'(lambda (val a n)
+			   (if (= n 0)
+			       (= val 2)
+			       (= (mod val #{a[n-1]}) 0)))
+		       a)
+		      5
+		      '(2 4 8 16 32))
+	   )))
   
   (setf *readtable* *old-table*))
 

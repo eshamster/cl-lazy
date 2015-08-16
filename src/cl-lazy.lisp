@@ -134,6 +134,31 @@ Ex2. Fibonacci series -> [0, 1, 1, 2, 3, 5, 8, 13, ...]
 				 `(lnth ,n ,series))
 			     some-series))))))
 
+@export
+(defun filter-series (fn-find series &key (give-up-distance 10000))
+  (filter-series-using-little #'(lambda (value a n)
+				   (declare (ignore a n))
+				   (funcall fn-find value))
+			       series
+			       :give-up-distance give-up-distance))
+
+@export
+(defun filter-series-using-little (fn-find series &key (give-up-distance 10000))
+  (let ((rest-series series)
+	(has-give-up nil))
+    (make-series
+     nil
+     #'(lambda (a n)
+	 (block blk
+	   (if has-give-up (return-from blk nil))
+	   (loop for i from 0 to give-up-distance do
+		(let ((target (lcar rest-series)))
+		  (setf rest-series (lcdr rest-series))
+		  (if (funcall fn-find target a n)
+		      (return-from blk target))))
+	   (setf has-give-up t)
+	   nil)))))
+
 #|-------------
   Reader Macro
   -------------|#
