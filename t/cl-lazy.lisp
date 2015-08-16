@@ -7,7 +7,7 @@
 
 ;; NOTE: To run this test file, execute `(asdf:test-system :cl-lazy)' in your Lisp.
 
-(plan 9)
+(plan 10)
 
 (subtest
     "Test if it is evaluated only once"
@@ -112,23 +112,30 @@
       (let ((x #<a[n] = (* (1+ n) 2)>))
 	(is-series #<b[k] = x[0], (* b[k-1] 2)>
 		   5
-		   '(2 4 8 16 32)))))
-  
-  (subtest
-      "Test unexporting readtable"
-    (setf *readtable* *old-table*)
-    (ok (not (get-dispatch-macro-character #\# #\{)))))
+		   '(2 4 8 16 32))))))
 
 
 (lexport-readtable)
-(subtest
-    "Test concat-series"
-  (let ((an #<a[n] = (* n 2)>)
-	(bn #<a[n] = (* n 3)>)
-	(cn #<a[n] = (* n 5)>))
-    (is-series (concat-series #'(lambda (a b c) (list a b c)) an bn cn)
-	       4
-	       '((0 0 0 ) (2 3 5) (4 6 10) (6 9 15)))))
-(setf *readtable* *old-table*)
+(unwind-protect
+     (progn 
+       (subtest
+	   "Test do-series"
+	 (let ((series1 #<a[n] = (* n 2)>)
+	       (series2 #<a[n] = 0, nil, nil, (* n 2)>))
+	   (is-print (do-series (val series1 to 5) (format t "~D " val))
+		     "0 2 4 6 8 10 ")
+	   (is-print (do-series (val series2 to 5) (format t "~D " val))
+		     "0 NIL NIL 6 8 10 ")))
+
+       (subtest
+	   "Test concat-series"
+	 (let ((an #<a[n] = (* n 2)>)
+	       (bn #<a[n] = (* n 3)>)
+	       (cn #<a[n] = (* n 5)>))
+	   (is-series (concat-series #'(lambda (a b c) (list a b c)) an bn cn)
+		      4
+		      '((0 0 0 ) (2 3 5) (4 6 10) (6 9 15))))))
+  
+  (setf *readtable* *old-table*))
 
 (finalize)

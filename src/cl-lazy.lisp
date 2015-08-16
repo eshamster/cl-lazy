@@ -107,6 +107,20 @@ Ex2. Fibonacci series -> [0, 1, 1, 2, 3, 5, 8, 13, ...]
 #|-------
    Utils
   -------|#
+
+; TODO: consider refacoring to use do-llist
+@export
+(defmacro do-series ((value series to last-index) &body body)
+  (unless (equal (symbol-name to) (symbol-name 'to))
+    (error 'simple-error))
+  (let ((rest-series (gensym))
+	(i (gensym)))
+    `(let ((,rest-series ,series))
+       (loop for ,i from 0 to ,last-index do
+	  (let ((,value (lcar ,rest-series)))
+	    (setf ,rest-series (lcdr ,rest-series))
+	    ,@body)))))
+
 @export
 (defmacro concat-series (fn-concat &rest some-series)
   (let ((a (gensym))
