@@ -165,7 +165,7 @@ Ex2. Fibonacci series -> [0, 1, 1, 2, 3, 5, 8, 13, ...]
   Reader Macro
   -------------|#
 @export
-(defun lexport-readtable ()
+(defun enable-series-processing-syntax ()
   (let ((old-table (copy-readtable *readtable*)))
     (setf *readtable* (add-readtable))
     old-table))
