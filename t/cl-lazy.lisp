@@ -78,9 +78,9 @@
 	     10
 	     '(0 1 1 2 3 5 8 13 21 34)))
 
-(defparameter *old-table* (lexport-readtable))
+(defparameter *old-table* (enable-series-processing-syntax))
 (subtest
-    "Test lexport-readtable"
+    "Test enable-series-processing-syntax"
   (is-expand #{a (+ n 1)} (lnth (+ n 1) a))
   (is-expand #[1] 1)
   (is-expand #[1*2] (* 1 2))
@@ -115,7 +115,7 @@
 		   '(2 4 8 16 32))))))
 
 
-(lexport-readtable)
+(enable-series-processing-syntax)
 (unwind-protect
      (progn 
        (subtest
