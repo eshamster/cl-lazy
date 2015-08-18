@@ -54,9 +54,10 @@
     (f tail (reverse lst))))
 
 @export
-(defun llist-to-list (llist &key (max-length -1))
+(defun llist-to-list (llist &key (max-length -1) (stops-at-nil t))
   (labels ((f (lst rest-llist rest-length)
 	     (if (or (null rest-llist)
+		     (and stops-at-nil (null (lcar rest-llist)))
 		     (and (>= max-length 0) (<= rest-length 0)))
 		 lst
 		 (f (cons (lcar rest-llist) lst)

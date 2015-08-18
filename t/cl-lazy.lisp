@@ -47,7 +47,10 @@
     (is (llist-to-list llst :max-length  1) '(1))
     (is (llist-to-list llst :max-length  2) '(1 2))
     (is (llist-to-list llst :max-length  3) '(1 2 3))
-    (is (llist-to-list llst :max-length  100) '(1 2 3))))
+    (is (llist-to-list llst :max-length  100) '(1 2 3)))
+
+  (is (llist-to-list (llist 1 2 nil 3)) '(1 2))
+  (is (llist-to-list (llist 1 2 nil 3) :stops-at-nil nil) '(1 2 nil 3)))
 
 (subtest
     "Test do-llist"
