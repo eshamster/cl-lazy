@@ -7,7 +7,7 @@
 
 ;; NOTE: To run this test file, execute `(asdf:test-system :cl-lazy)' in your Lisp.
 
-(plan 11)
+(plan 12)
 
 (subtest
     "Test if it is evaluated only once"
@@ -117,10 +117,17 @@
 		   5
 		   '(2 4 8 16 32))))))
 
-
 (enable-series-processing-syntax)
 (unwind-protect
-     (progn 
+     (progn
+       (subtest
+	   "Test is-series-end"
+	 (let ((s #<a[n] = 0, 1, nil>))
+	   (ok (not (is-series-end s)))
+	   (ok (not (is-series-end (lnthcdr 1 s))))
+	   (ok (is-series-end (lnthcdr 2 s)))
+	   (ok (is-series-end (lnthcdr 3 s)))))
+       
        (subtest
 	   "Test do-series"
 	 (let ((series1 #<a[n] = (* n 2)>)

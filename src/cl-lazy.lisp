@@ -54,16 +54,16 @@
     (f tail (reverse lst))))
 
 @export
-(defun llist-to-list (llist &key (max-length -1) (stops-at-nil t))
-  (labels ((f (lst rest-llist rest-length)
-	     (if (or (null rest-llist)
-		     (and stops-at-nil (null (lcar rest-llist)))
+(defun llist-to-list (llst &key (max-length -1) (stops-at-nil t))
+  (labels ((f (lst rest-llst rest-length)
+	     (if (or (null rest-llst)
+		     (and stops-at-nil (null (lcar rest-llst)))
 		     (and (>= max-length 0) (<= rest-length 0)))
 		 lst
-		 (f (cons (lcar rest-llist) lst)
-		    (lcdr rest-llist)
+		 (f (cons (lcar rest-llst) lst)
+		    (lcdr rest-llst)
 		    (1- rest-length)))))
-    (reverse (f nil llist max-length))))
+    (reverse (f nil llst max-length))))
 
 @export
 (defun lnth (n l-lst)
@@ -76,7 +76,7 @@
       (lnthcdr (1- n) (lcdr l-lst))))
 
 @export
-(defmacro do-llist ((value llist) &body body)
+(defmacro do-llist ((value llst) &body body)
   (let ((f (gensym))
 	(rest (gensym)))
     `(labels ((,f (,rest)
@@ -85,7 +85,7 @@
 		(let ((,value (lcar ,rest)))
 		  ,@body
 		  (,f (lcdr ,rest)))))
-       (,f ,llist))))
+       (,f ,llst))))
 
 #|
 Ex1. Series of even numbers -> [0, 2, 4, 6, ...]
@@ -108,6 +108,10 @@ Ex2. Fibonacci series -> [0, 1, 1, 2, 3, 5, 8, 13, ...]
 #|-------
    Utils
   -------|#
+
+@export
+(defun is-series-end (series)
+  (null (lcar series)))
 
 @export
 (defmacro do-series ((value series to last-index) &body body)
