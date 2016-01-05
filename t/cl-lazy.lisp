@@ -54,11 +54,14 @@
   (is (llist-to-list (llist 1 2 nil 3)) '(1 2))
   (is (llist-to-list (llist 1 2 nil 3) :stops-at-nil nil) '(1 2 nil 3)))
 
+(defun is-llist (got-llst expected &key (max-length -1))
+  (is (llist-to-list got-llst :max-length max-length) expected
+      :test #'equal))
+
 (subtest
     "Test lreverse"
-  (is (llist-to-list (lreverse (llist 1 2 3)))
-      '(3 2 1)
-      :test #'equal))
+  (is-llist (lreverse (llist 1 2 3))
+            '(3 2 1)))
 
 (subtest
     "Test lspan"
@@ -84,18 +87,15 @@
 (subtest
     "Test lappend"
   (let ((llst (llist 1 2)))
-    (is (llist-to-list (lappend llst (llist 3 4)))
-        '(1 2 3 4)
-        :test #'equal)
-    (is (llist-to-list llst) '(1 2) :test #'equal))
-  (is (llist-to-list (lappend (llist 1 2) (llist 3 4) (llist 5 6)))
-      '(1 2 3 4 5 6)
-      :test #'equal)
+    (is-llist (lappend llst (llist 3 4))
+              '(1 2 3 4))
+    (is-llist llst '(1 2)))
+  (is-llist (lappend (llist 1 2) (llist 3 4) (llist 5 6))
+            '(1 2 3 4 5 6))
   (let ((series #<a[n] = (* n 2)>))
-    (is (llist-to-list (lappend (llist 100 200) series)
-                       :max-length 4)
-        '(100 200 0 2)
-        :test #'equal)))
+    (is-llist (lappend (llist 100 200) series)
+              '(100 200 0 2)
+              :max-length 4)))
 
 (subtest
     "Test do-llist"
