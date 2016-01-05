@@ -87,6 +87,14 @@
 		  (,f (lcdr ,rest)))))
        (,f ,llst))))
 
+@export
+(defun lreverse (llst)
+  (labels ((rec (result rest-llst)
+             (if (lcar rest-llst)
+                 (rec (lcons (lcar rest-llst) result) (lcdr rest-llst))
+                 result)))
+    (rec nil llst)))
+
 #|
 Ex1. Series of even numbers -> [0, 2, 4, 6, ...]
   (make-series nil #'(lambda (a n) (* n 2)))

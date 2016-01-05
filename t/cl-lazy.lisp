@@ -7,7 +7,7 @@
 
 ;; NOTE: To run this test file, execute `(asdf:test-system :cl-lazy)' in your Lisp.
 
-(plan 12)
+(plan 13)
 
 (subtest
     "Test if it is evaluated only once"
@@ -51,6 +51,13 @@
 
   (is (llist-to-list (llist 1 2 nil 3)) '(1 2))
   (is (llist-to-list (llist 1 2 nil 3) :stops-at-nil nil) '(1 2 nil 3)))
+
+(subtest
+    "Test lreverse"
+  (is (llist-to-list (lreverse (llist 1 2 3)))
+      '(3 2 1)
+      :test #'equal))
+
 
 (subtest
     "Test do-llist"
