@@ -95,6 +95,18 @@
                  result)))
     (rec nil llst)))
 
+@export
+(defun lspan (predicate llst)
+  "Extract from llst until the predication is failed. Value 1 is the extracted lazy list, and value 2 is the rest lazy list"
+  (let (rest)
+    (labels ((rec-find (ok rest-llst)
+               (if (and rest-llst
+                        (funcall predicate (lcar rest-llst)))
+                   (rec-find (lcons (lcar rest-llst) ok) (lcdr rest-llst))
+                   (progn (setf rest rest-llst)
+                          (lreverse ok)))))
+      (values (rec-find nil llst) rest))))
+
 #|
 Ex1. Series of even numbers -> [0, 2, 4, 6, ...]
   (make-series nil #'(lambda (a n) (* n 2)))

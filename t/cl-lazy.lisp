@@ -7,7 +7,7 @@
 
 ;; NOTE: To run this test file, execute `(asdf:test-system :cl-lazy)' in your Lisp.
 
-(plan 13)
+(plan 14)
 
 (subtest
     "Test if it is evaluated only once"
@@ -58,6 +58,26 @@
       '(3 2 1)
       :test #'equal))
 
+(subtest
+    "Test lspan"
+  (is (multiple-value-bind (target rest)
+          (lspan (lambda (x) (< x 3)) (llist 1 2 3 2 1))
+        (list (llist-to-list target)
+              (llist-to-list rest)))
+      '((1 2) (3 2 1))
+      :test #'equal)
+  (is (multiple-value-bind (target rest)
+          (lspan (lambda (x) (< x 0)) (llist 1 2 3 2 1))
+        (list (llist-to-list target)
+              (llist-to-list rest)))
+      '(() (1 2 3 2 1))
+      :test #'equal)
+  (is (multiple-value-bind (target rest)
+          (lspan (lambda (x) (< x 100)) (llist 1 2 3 2 1))
+        (list (llist-to-list target)
+              (llist-to-list rest)))
+      '((1 2 3 2 1) ())
+      :test #'equal))
 
 (subtest
     "Test do-llist"
