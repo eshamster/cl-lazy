@@ -7,7 +7,9 @@
 
 ;; NOTE: To run this test file, execute `(asdf:test-system :cl-lazy)' in your Lisp.
 
-(plan 14)
+(enable-series-processing-syntax)
+
+(plan 15)
 
 (subtest
     "Test if it is evaluated only once"
@@ -80,6 +82,22 @@
       :test #'equal))
 
 (subtest
+    "Test lappend"
+  (let ((llst (llist 1 2)))
+    (is (llist-to-list (lappend llst (llist 3 4)))
+        '(1 2 3 4)
+        :test #'equal)
+    (is (llist-to-list llst) '(1 2) :test #'equal))
+  (is (llist-to-list (lappend (llist 1 2) (llist 3 4) (llist 5 6)))
+      '(1 2 3 4 5 6)
+      :test #'equal)
+  (let ((series #<a[n] = (* n 2)>))
+    (is (llist-to-list (lappend (llist 100 200) series)
+                       :max-length 4)
+        '(100 200 0 2)
+        :test #'equal)))
+
+(subtest
     "Test do-llist"
   (let ((llst (llist 1 2 nil nil 5 nil)))
     (is-print (do-llist (val llst) (format t "~A " val))
@@ -144,7 +162,6 @@
 		   5
 		   '(2 4 8 16 32))))))
 
-(enable-series-processing-syntax)
 (unwind-protect
      (progn
        (subtest

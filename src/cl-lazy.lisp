@@ -3,7 +3,8 @@
   --------|#
 (in-package :cl-user)
 (defpackage cl-lazy
-  (:use :cl))
+  (:use :cl
+        :anaphora))
 (in-package :cl-lazy)
 
 (cl-annot:enable-annot-syntax)
@@ -65,6 +66,17 @@
 		    (1- rest-length)))))
     (reverse (f nil llst max-length))))
 
+#|
+@export
+(defun list-to-llist (lst)
+  (labels ((f (result rest-lst)
+	     (if (endp rest-lst)
+		 result
+		 (f (lcons (car rest-lst) result)
+		    (cdr rest-lst)))))
+    ()))
+|#
+
 @export
 (defun lnth (n l-lst)
   (lcar (lnthcdr n l-lst)))
@@ -106,6 +118,22 @@
                    (progn (setf rest rest-llst)
                           (lreverse ok)))))
       (values (rec-find nil llst) rest))))
+
+@export
+(defun lappend (&rest llsts)
+  (let ((target-llst (car llsts))
+        (rest-llsts (cdr llsts)))
+    (labels ((get-next ()
+               (aif (lcar target-llst)
+                    (progn (setf target-llst (lcdr target-llst))
+                           it)
+                    (when rest-llsts
+                      (setf target-llst (car rest-llsts))
+                      (setf rest-llsts (cdr rest-llsts))
+                      (get-next))))
+             (lrec (next)
+               (lcons next (lrec (get-next)))))
+      (lrec (get-next)))))
 
 #|
 Ex1. Series of even numbers -> [0, 2, 4, 6, ...]
@@ -226,7 +254,7 @@ Ex2. Fibonacci series -> [0, 1, 1, 2, 3, 5, 8, 13, ...]
 	       #|
 	       Basically this function traces the list recursively
 	       and only reconstructs the same list.
-	       But if finds (#\[ (a b)), sorts this to (lnth b a).
+	       But if finds (a (#\[ b)), sorts this to (lnth b a).
 	       |#
 	       (let ((res nil))
 		 (dolist (elem buf)
@@ -256,6 +284,7 @@ Ex2. Fibonacci series -> [0, 1, 1, 2, 3, 5, 8, 13, ...]
 	      (position delimiter lst :from-end t)))
 
 ; #{a n} -> (lnth n a)
+; #{a n k} -> (lnth k (lnth n a))
 (defun {-reader (stream &rest rest)
   (declare (ignore rest))
   (let ((*readtable* (copy-readtable *readtable*))
