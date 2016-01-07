@@ -196,13 +196,15 @@ Ex2. Fibonacci series -> [0, 1, 1, 2, 3, 5, 8, 13, ...]
     (make-series
      nil
      #'(lambda (a n)
-	 (block blk
-	   (loop for i from 0 to give-up-distance do
-		(let ((target (lcar rest-series)))
-		  (setf rest-series (lcdr rest-series))
-		  (if (funcall fn-find target a n)
-		      (return-from blk target))))
-	   (error "A target value didn't be found in ~D span" give-up-distance))))))
+	 (labels ((get-next (&optional (rest-dist give-up-distance))
+                    (when (<= rest-dist 0)
+                      (error "A target value didn't be found in ~D span" give-up-distance))
+                    (let ((target (lcar rest-series)))
+                      (setf rest-series (lcdr rest-series))
+                      (if (funcall fn-find target a n)
+                          target
+                          (get-next (1- rest-dist))))))
+           (get-next))))))
 
 #|-------------
   Reader Macro
