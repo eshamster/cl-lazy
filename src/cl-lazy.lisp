@@ -32,9 +32,8 @@
 
 @export
 (defmacro lcar (l-lst)
-  `(if (null ,l-lst)
-       nil
-       (car (force ,l-lst))))
+  `(when ,l-lst
+     (car (force ,l-lst))))
 
 @export
 (defmacro lcdr (l-lst)
