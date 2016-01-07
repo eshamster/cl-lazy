@@ -121,19 +121,13 @@
 
 @export
 (defun lappend (&rest llsts)
-  (let ((target-llst (car llsts))
-        (rest-llsts (cdr llsts)))
-    (labels ((get-next ()
-               (aif (lcar target-llst)
-                    (progn (setf target-llst (lcdr target-llst))
-                           it)
-                    (when rest-llsts
-                      (setf target-llst (car rest-llsts))
-                      (setf rest-llsts (cdr rest-llsts))
-                      (get-next))))
-             (lrec (next)
-               (lcons next (lrec (get-next)))))
-      (lrec (get-next)))))
+  (labels ((get-next (&optional (target-llst (car llsts))
+                                (rest-llsts (cdr llsts)))
+             (aif (lcar target-llst)
+                  (lcons it (get-next (lcdr target-llst) rest-llsts)) 
+                  (when rest-llsts 
+                    (get-next (car rest-llsts) (cdr rest-llsts))))))
+    (get-next)))
 
 #|
 Ex1. Series of even numbers -> [0, 2, 4, 6, ...]
