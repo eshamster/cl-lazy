@@ -195,13 +195,12 @@
 	   (is-series (filter-series #'oddp a)
 		      5
 		      '(1 3 5 7 9))
-	   (is-series (filter-series
-		       #'(lambda (val)
-			   (= (mod val 100) 20))
-		       a
-		       :give-up-distance 50)
-		      3
-		      '(20 nil nil))
+	   (is-error (lnth 2 (filter-series
+                              #'(lambda (val)
+                                  (= (mod val 100) 20))
+                              a
+                              :give-up-distance 50))
+                     'simple-error)
 	   (is-series (filter-series-using-little
 		       #'(lambda (val a n)
 			   (if (= n 0)

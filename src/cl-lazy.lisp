@@ -193,20 +193,17 @@ Ex2. Fibonacci series -> [0, 1, 1, 2, 3, 5, 8, 13, ...]
 
 @export
 (defun filter-series-using-little (fn-find series &key (give-up-distance 10000))
-  (let ((rest-series series)
-	(has-give-up nil))
+  (let ((rest-series series))
     (make-series
      nil
      #'(lambda (a n)
 	 (block blk
-	   (if has-give-up (return-from blk nil))
 	   (loop for i from 0 to give-up-distance do
 		(let ((target (lcar rest-series)))
 		  (setf rest-series (lcdr rest-series))
 		  (if (funcall fn-find target a n)
 		      (return-from blk target))))
-	   (setf has-give-up t)
-	   nil)))))
+	   (error "A target value didn't be found in ~D span" give-up-distance))))))
 
 #|-------------
   Reader Macro
