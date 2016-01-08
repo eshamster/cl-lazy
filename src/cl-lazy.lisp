@@ -39,7 +39,7 @@
 (defmacro lcdr (l-lst)
   `(if (null ,l-lst)
        nil
-      (cdr (force ,l-lst))))
+       (cdr (force ,l-lst))))
 
 @export
 (defmacro llist (&rest rest)
@@ -137,7 +137,7 @@ Ex2. Fibonacci series -> [0, 1, 1, 2, 3, 5, 8, 13, ...]
 |#
 @export
 (defun make-series (init-nums fn-calc)
-  (let ((a nil))
+  (let (a)
     (labels ((f (n) (lcons (funcall fn-calc a n) (f (1+ n)))))
       (setf a (recursive-lcons init-nums (f (length init-nums)))))))
 
@@ -156,7 +156,7 @@ Ex2. Fibonacci series -> [0, 1, 1, 2, 3, 5, 8, 13, ...]
 
 @export
 (defmacro do-series ((value series to last-index) &body body)
-  (unless (equal (symbol-name to) (symbol-name 'to))
+  (unless (equal (symbol-name to) "TO")
     (error 'simple-error))
   (let ((counter (gensym))
 	(last (gensym)))
@@ -227,7 +227,7 @@ Ex2. Fibonacci series -> [0, 1, 1, 2, 3, 5, 8, 13, ...]
 (defun <-reader (stream &rest rest)
   (declare (ignore rest))
   (let ((*readtable* (copy-readtable *readtable*))
-	(buf) (a) (n))
+	buf a n)
     (set-separate-character #\>)
     (set-separate-character #\=)
     (set-separate-character #\[)
@@ -248,7 +248,7 @@ Ex2. Fibonacci series -> [0, 1, 1, 2, 3, 5, 8, 13, ...]
 	       and only reconstructs the same list.
 	       But if finds (a (#\[ b)), sorts this to (lnth b a).
 	       |#
-	       (let ((res nil))
+	       (let (res)
 		 (dolist (elem buf)
 		   (if (listp elem)
 		       (let ((child (sort-ref-series elem)))
