@@ -17,7 +17,8 @@
   :author "eshamster"
   :license ""
   :depends-on (:cl-annot
-               :anaphora)
+               :anaphora
+               :alexandria)
   :components ((:module "src"
                 :components
                 ((:file "cl-lazy"))))

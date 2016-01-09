@@ -4,15 +4,16 @@
 (in-package :cl-user)
 (defpackage cl-lazy
   (:use :cl
-        :anaphora))
+        :anaphora)
+  (:import-from :alexandria
+                :with-gensyms))
 (in-package :cl-lazy)
 
 (cl-annot:enable-annot-syntax)
 
 @export
 (defmacro lazy (&body body)
-  (let ((value (gensym))
-	(evaluated (gensym)))
+  (with-gensyms (value evaluated)
     `(let ((,value nil)
 	   (,evaluated nil))
        (lambda ()
@@ -86,8 +87,7 @@
 
 @export
 (defmacro do-llist ((value llst) &body body)
-  (let ((f (gensym))
-	(rest (gensym)))
+  (with-gensyms (f rest)
     `(labels ((,f (,rest)
 		(when ,rest
                   (let ((,value (lcar ,rest)))
@@ -155,8 +155,7 @@ Ex2. Fibonacci series -> [0, 1, 1, 2, 3, 5, 8, 13, ...]
 (defmacro do-series ((value series to last-index) &body body)
   (unless (equal (symbol-name to) "TO")
     (error 'simple-error))
-  (let ((counter (gensym))
-	(last (gensym)))
+  (with-gensyms (counter last)
     `(block blk
        (let ((,counter 0)
 	     (,last ,last-index))
@@ -168,8 +167,7 @@ Ex2. Fibonacci series -> [0, 1, 1, 2, 3, 5, 8, 13, ...]
 
 @export
 (defmacro concat-series (fn-concat &rest some-series)
-  (let ((a (gensym))
-	(n (gensym)))
+  (with-gensyms (a n)
     `(make-series
       nil
       #'(lambda (,a ,n)
