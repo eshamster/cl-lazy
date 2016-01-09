@@ -89,11 +89,10 @@
   (let ((f (gensym))
 	(rest (gensym)))
     `(labels ((,f (,rest)
-		(if (null ,rest)
-		    (return-from ,f))
-		(let ((,value (lcar ,rest)))
-		  ,@body
-		  (,f (lcdr ,rest)))))
+		(when ,rest
+                  (let ((,value (lcar ,rest)))
+                    ,@body
+                    (,f (lcdr ,rest))))))
        (,f ,llst))))
 
 @export
