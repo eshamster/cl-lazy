@@ -43,14 +43,14 @@
 
 @export
 (defmacro llist (&rest rest)
-  `,(llist-body rest))
+  (llist-body rest))
 
 ; (llist-body '(1 2 3) :tail tail) -> (LCONS 1 (LCONS 2 (LCONS 3 tail)))
 (defun llist-body (lst &key (tail nil))
   (labels ((f (llst rest-arg)
 	     (if (null rest-arg)
 		 llst
-		 (f (cons 'lcons (list (car rest-arg) llst)) (cdr rest-arg)))))
+		 (f `(lcons ,(car rest-arg) ,llst) (cdr rest-arg)))))
     (f tail (reverse lst))))
 
 @export
