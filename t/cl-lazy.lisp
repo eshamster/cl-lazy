@@ -36,7 +36,7 @@
       (is res 2))))
 
 (subtest
-    "Test llist, llist-to-list"
+    "Test llist, llist-to-list, list-to-llist"
   (let ((llst (llist 1 (progn (princ "b") 2) 3))
 	(res nil))
     (is-print (setf res (llist-to-list llst)) "b")
@@ -52,7 +52,10 @@
     (is (llist-to-list llst :max-length  100) '(1 2 3)))
 
   (is (llist-to-list (llist 1 2 nil 3)) '(1 2))
-  (is (llist-to-list (llist 1 2 nil 3) :stops-at-nil nil) '(1 2 nil 3)))
+  (is (llist-to-list (llist 1 2 nil 3) :stops-at-nil nil) '(1 2 nil 3))
+  (subtest
+      "list-to-llist"
+    (is (llist-to-list (list-to-llist '(1 2 3))) '(1 2 3))))
 
 (defun is-llist (got-llst expected &key (max-length -1))
   (is (llist-to-list got-llst :max-length max-length) expected

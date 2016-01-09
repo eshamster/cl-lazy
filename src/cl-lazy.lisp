@@ -65,16 +65,14 @@
 		    (1- rest-length)))))
     (nreverse (f nil llst max-length))))
 
-#|
 @export
 (defun list-to-llist (lst)
-  (labels ((f (result rest-lst)
-	     (if (endp rest-lst)
-		 result
-		 (f (lcons (car rest-lst) result)
-		    (cdr rest-lst)))))
-    ()))
-|#
+  (labels ((rec (rest-lst &optional (result nil))
+             (if rest-lst
+                 (rec (cdr rest-lst)
+                      (lcons (car rest-lst) result))
+                 result)))
+    (rec (reverse lst))))
 
 @export
 (defun lnth (n l-lst)
