@@ -58,12 +58,12 @@
   (labels ((f (lst rest-llst rest-length)
 	     (if (or (null rest-llst)
 		     (and stops-at-nil (null (lcar rest-llst)))
-		     (and (>= max-length 0) (<= rest-length 0)))
+		     (= rest-length 0))
 		 lst
 		 (f (cons (lcar rest-llst) lst)
 		    (lcdr rest-llst)
 		    (1- rest-length)))))
-    (reverse (f nil llst max-length))))
+    (nreverse (f nil llst max-length))))
 
 #|
 @export
