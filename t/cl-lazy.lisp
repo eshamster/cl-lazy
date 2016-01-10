@@ -123,11 +123,17 @@
     (is lst expected :test #'equalp)))
 
 (subtest
-    "Test make-series"
-  (is-series (make-series nil #'(lambda (a n) (declare (ignore a)) (* (1+ n) 2))) 5 '(2 4 6 8 10))
-  (is-series (make-series '(0 1) #'(lambda (a n) (+ (lnth (- n 1) a) (lnth (- n 2) a))))
-	     10
-	     '(0 1 1 2 3 5 8 13 21 34)))
+    "Test series making functions"
+  (subtest
+      "Test make-series"
+    (is-series (make-series nil (lambda (a n) (declare (ignore a)) (* (1+ n) 2))) 5 '(2 4 6 8 10))
+    (is-series (make-series '(0 1) (lambda (a n) (+ (lnth (- n 1) a) (lnth (- n 2) a))))
+               10
+               '(0 1 1 2 3 5 8 13 21 34)))
+  (subtest
+      "Test make-simple-series"
+    (is-series (make-simple-series nil (lambda (n) (* (1+ n) 2))) 5 '(2 4 6 8 10))
+    (is-series (make-simple-series '(3 4) (lambda (n) (* n 5))) 5 '(3 4 10 15 20))))
 
 (defparameter *old-table* (enable-series-processing-syntax))
 (subtest
