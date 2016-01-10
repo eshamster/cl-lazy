@@ -144,6 +144,13 @@ Ex2. Fibonacci series -> [0, 1, 1, 2, 3, 5, 8, 13, ...]
   (labels ((f (n) (lcons (funcall fn-calc n) (f (1+ n)))))
     (recursive-lcons init-nums (f (length init-nums)))))
 
+@export
+(defun liota (&optional (start 0) (step 1) (count -1))
+  (labels ((rec (value rest-count)
+             (when (/= rest-count 0)
+               (lcons value (rec (+ value step) (1- rest-count))))))
+    (rec start count)))
+
 (defun recursive-lcons (lst tail)
   (if (null lst)
       tail

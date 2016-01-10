@@ -128,7 +128,14 @@
   (subtest
       "Test make-simple-series"
     (is-llist (make-simple-series nil (lambda (n) (* (1+ n) 2))) '(2 4 6 8 10) :max-length 5)
-    (is-llist (make-simple-series '(3 4) (lambda (n) (* n 5))) '(3 4 10 15 20) :max-length 5)))
+    (is-llist (make-simple-series '(3 4) (lambda (n) (* n 5))) '(3 4 10 15 20) :max-length 5))
+  (subtest
+      "Test liota"
+    (is-llist (liota) '(0 1 2 3 4) :max-length 5)
+    (is-llist (liota 2) '(2 3 4 5 6) :max-length 5)
+    (is-llist (liota 3 4) '(3 7 11 15 19) :max-length 5)
+    (is-llist (liota 3 1/2) '(3 7/2 4 9/2 5) :max-length 5)
+    (is-llist (liota 2 1 3) '(2 3 4))))
 
 (defparameter *old-table* (enable-series-processing-syntax))
 (subtest
