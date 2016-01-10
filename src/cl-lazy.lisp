@@ -180,11 +180,10 @@ Ex2. Fibonacci series -> [0, 1, 1, 2, 3, 5, 8, 13, ...]
 
 @export
 (defmacro concat-series (fn-concat &rest some-series)
-  (with-gensyms (a n)
-    `(make-series
+  (with-gensyms (n)
+    `(make-simple-series
       nil
-      #'(lambda (,a ,n)
-	  (declare (ignore ,a))
+      #'(lambda (,n)
 	  (funcall ,fn-concat
 		   ,@(mapcar #'(lambda (series)
 				 `(lnth ,n ,series))
