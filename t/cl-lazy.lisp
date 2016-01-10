@@ -201,25 +201,29 @@
                      '((0 0 0 ) (2 3 5) (4 6 10) (6 9 15))
                      :max-length 4)))
        (subtest
-	   "Test filter-seires & filter-series-with-little"
-	 (let ((a #<a [n] = n>))
-	   (is-llist (filter-series #'oddp a)
-                     '(1 3 5 7 9)
-                     :max-length 5)
-	   (is-error (lnth 2 (filter-series
-                              #'(lambda (val)
-                                  (= (mod val 100) 20))
-                              a
-                              :give-up-distance 50))
-                     'simple-error)
-	   (is-llist (filter-series-using-little
-                      #'(lambda (val a n)
-                          (if (= n 0)
-                              (= val 2)
-                              (= (mod val #{a[n-1]}) 0)))
-                      a)
-                     '(2 4 8 16 32)
-                     :max-length 5))))
+	   "Test filter functions"
+	 (let ((a #<a[n] = n>))
+           (subtest
+               "Test filter-seires"
+             (is-llist (filter-series #'oddp a)
+                       '(1 3 5 7 9)
+                       :max-length 5)
+             (is-error (lnth 2 (filter-series
+                                #'(lambda (val)
+                                    (= (mod val 100) 20))
+                                a
+                                :give-up-distance 50))
+                       'simple-error))
+           (subtest
+               "Test filter-series-using-little"
+             (is-llist (filter-series-using-little
+                        #'(lambda (val a n)
+                            (if (= n 0)
+                                (= val 2)
+                                (= (mod val #{a[n-1]}) 0)))
+                        a)
+                       '(2 4 8 16 32)
+                       :max-length 5)))))
   
   (setf *readtable* *old-table*))
 
