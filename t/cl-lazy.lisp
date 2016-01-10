@@ -115,25 +115,20 @@
     (ok (null (lnth 3 llst)))
     (ok (null (lnth 10 llst)))))
 
-(defun is-series (l-lst test-len expected)
-  (let ((lst nil))
-    (dotimes (i test-len)
-      (setf lst (cons (lnth i l-lst) lst)))
-    (setf lst (reverse lst))
-    (is lst expected :test #'equalp)))
-
 (subtest
     "Test series making functions"
   (subtest
       "Test make-series"
-    (is-series (make-series nil (lambda (a n) (declare (ignore a)) (* (1+ n) 2))) 5 '(2 4 6 8 10))
-    (is-series (make-series '(0 1) (lambda (a n) (+ (lnth (- n 1) a) (lnth (- n 2) a))))
-               10
-               '(0 1 1 2 3 5 8 13 21 34)))
+    (is-llist (make-series nil (lambda (a n) (declare (ignore a)) (* (1+ n) 2)))
+              '(2 4 6 8 10)
+              :max-length 5)
+    (is-llist (make-series '(0 1) (lambda (a n) (+ (lnth (- n 1) a) (lnth (- n 2) a))))
+              '(0 1 1 2 3 5 8 13 21 34)
+              :max-length 10))
   (subtest
       "Test make-simple-series"
-    (is-series (make-simple-series nil (lambda (n) (* (1+ n) 2))) 5 '(2 4 6 8 10))
-    (is-series (make-simple-series '(3 4) (lambda (n) (* n 5))) 5 '(3 4 10 15 20))))
+    (is-llist (make-simple-series nil (lambda (n) (* (1+ n) 2))) '(2 4 6 8 10) :max-length 5)
+    (is-llist (make-simple-series '(3 4) (lambda (n) (* n 5))) '(3 4 10 15 20) :max-length 5)))
 
 (defparameter *old-table* (enable-series-processing-syntax))
 (subtest
@@ -149,9 +144,9 @@
   (is-expand #{a[n-1]} (lnth (- n 1) a))
   (is-expand #{a[n-1][m]} (lnth m (lnth (- n 1) a)))
   
-  (is-series (make-series '(0 1) #'(lambda (a n) (+ #{a[n-1]} #{a[n-2]})))
-	     10
-	     '(0 1 1 2 3 5 8 13 21 34))
+  (is-llist (make-series '(0 1) #'(lambda (a n) (+ #{a[n-1]} #{a[n-2]})))
+            '(0 1 1 2 3 5 8 13 21 34)
+            :max-length 10)
 
   (subtest
       "Test #<>"
@@ -161,15 +156,15 @@
 	       (make-series (list 0 1) #'(lambda (a n)
 				       (declare (ignorable a n))
 				       (+ (* (lnth (- n 1) a) 2) (lnth (- n 2) a)))))
-    (is-series #<b[k] = 0, 1, (+ b[k-1] b[k-2])>
-	       10
-	       '(0 1 1 2 3 5 8 13 21 34))
+    (is-llist #<b[k] = 0, 1, (+ b[k-1] b[k-2])>
+              '(0 1 1 2 3 5 8 13 21 34)
+              :max-length 10)
     (subtest
 	"Test the format of x[y] can be used in initial values"
       (let ((x #<a[n] = (* (1+ n) 2)>))
-	(is-series #<b[k] = x[0], (* b[k-1] 2)>
-		   5
-		   '(2 4 8 16 32))))))
+	(is-llist #<b[k] = x[0], (* b[k-1] 2)>
+                  '(2 4 8 16 32)
+                  :max-length 5)))))
 
 (unwind-protect
      (progn
@@ -195,29 +190,29 @@
 	 (let ((an #<a[n] = (* n 2)>)
 	       (bn #<a[n] = (* n 3)>)
 	       (cn #<a[n] = (* n 5)>))
-	   (is-series (concat-series #'(lambda (a b c) (list a b c)) an bn cn)
-		      4
-		      '((0 0 0 ) (2 3 5) (4 6 10) (6 9 15)))))
+	   (is-llist (concat-series #'(lambda (a b c) (list a b c)) an bn cn)
+                     '((0 0 0 ) (2 3 5) (4 6 10) (6 9 15))
+                     :max-length 4)))
        (subtest
 	   "Test filter-seires & filter-series-with-little"
 	 (let ((a #<a [n] = n>))
-	   (is-series (filter-series #'oddp a)
-		      5
-		      '(1 3 5 7 9))
+	   (is-llist (filter-series #'oddp a)
+                     '(1 3 5 7 9)
+                     :max-length 5)
 	   (is-error (lnth 2 (filter-series
                               #'(lambda (val)
                                   (= (mod val 100) 20))
                               a
                               :give-up-distance 50))
                      'simple-error)
-	   (is-series (filter-series-using-little
-		       #'(lambda (val a n)
-			   (if (= n 0)
-			       (= val 2)
-			       (= (mod val #{a[n-1]}) 0)))
-		       a)
-		      5
-		      '(2 4 8 16 32)))))
+	   (is-llist (filter-series-using-little
+                      #'(lambda (val a n)
+                          (if (= n 0)
+                              (= val 2)
+                              (= (mod val #{a[n-1]}) 0)))
+                      a)
+                     '(2 4 8 16 32)
+                     :max-length 5))))
   
   (setf *readtable* *old-table*))
 
