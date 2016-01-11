@@ -116,13 +116,16 @@
       (values (rec-find nil llst) rest))))
 
 @export
-(defun lappend (&rest llsts)
-  (labels ((get-next (&optional (target-llst (car llsts))
-                                (rest-llsts (cdr llsts)))
+(defmacro lappend (&rest llsts)
+  `(lappend-body (llist ,@llsts)))
+
+(defun lappend-body (llsts)
+  (labels ((get-next (&optional (target-llst (lcar llsts))
+                                (rest-llsts (lcdr llsts)))
              (aif (lcar target-llst)
                   (lcons it (get-next (lcdr target-llst) rest-llsts)) 
-                  (when rest-llsts 
-                    (get-next (car rest-llsts) (cdr rest-llsts))))))
+                  (when rest-llsts
+                    (get-next (lcar rest-llsts) (lcdr rest-llsts))))))
     (get-next)))
 
 #|

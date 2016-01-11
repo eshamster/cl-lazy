@@ -107,7 +107,11 @@
   (let ((series #<a[n] = (* n 2)>))
     (is-llist (lappend (llist 100 200) series)
               '(100 200 0 2)
-              :max-length 4)))
+              :max-length 4))
+  (labels ((get-next (n)
+             (lappend (llist n)
+                      (get-next (1+ n)))))
+    (is-llist (get-next 0) '(0 1 2 3 4) :max-length 5)))
 
 (subtest
     "Test do-llist"
