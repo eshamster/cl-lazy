@@ -29,18 +29,18 @@
 
 @export
 (defmacro lcons (a b)
-  `(lazy (cons ,a ,b)))
+  `(cons (lazy ,a) (lazy ,b)))
 
 @export
 (defmacro lcar (l-lst)
   `(when ,l-lst
-     (car (force ,l-lst))))
+     (force (car ,l-lst))))
 
 @export
 (defmacro lcdr (l-lst)
-  `(if (null ,l-lst)
-       nil
-       (cdr (force ,l-lst))))
+  `(when ,l-lst
+     (force (car ,l-lst))
+     (force (cdr ,l-lst))))
 
 @export
 (defmacro llist (&rest rest)

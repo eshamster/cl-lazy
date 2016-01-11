@@ -26,6 +26,15 @@
 (subtest
     "Test lcons, lcar & lcdr"
   (subtest
+      "Test lazy cons cell"
+    (labels ((make-lcons () (lcons (progn (princ "a") 1)
+                                   (progn (princ "b") 2))))
+      (let ((res))
+        (is-print (setf res (lcar (make-lcons))) "a")
+        (is res 1)
+        (is-print (setf res (lcdr (make-lcons))) "ab")
+        (is res 2))))
+  (subtest
       "Test in 2 elements"
     (let ((lst (lcons (progn (princ "a") 1)
 		      (lcons (progn (princ "b") 2) nil)))
