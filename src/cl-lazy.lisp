@@ -108,11 +108,12 @@
   "Extract from llst until the predication is failed. The return value 1 is the extracted lazy list, and the value 2 is the rest lazy list"
   (let (rest)
     (labels ((rec-find (ok rest-llst)
-               (if (and rest-llst
-                        (funcall predicate (lcar rest-llst)))
-                   (rec-find (cons (lcar rest-llst) ok) (lcdr rest-llst))
-                   (progn (setf rest rest-llst)
-                          (list-to-llist (nreverse ok))))))
+               (alet (lcar rest-llst)
+                 (if (and rest-llst
+                          (funcall predicate it))
+                     (rec-find (cons it ok) (lcdr rest-llst))
+                     (progn (setf rest rest-llst)
+                            (list-to-llist (nreverse ok)))))))
       (values (rec-find nil llst) rest))))
 
 @export
