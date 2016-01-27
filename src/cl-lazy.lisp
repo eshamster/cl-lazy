@@ -122,10 +122,11 @@
 (defun lappend-body (llsts)
   (labels ((get-next (&optional (target-llst (lcar llsts))
                                 (rest-llsts (lcdr llsts)))
-             (aif (lcar target-llst)
-                  (lcons it (get-next (lcdr target-llst) rest-llsts)) 
-                  (when rest-llsts
-                    (get-next (lcar rest-llsts) (lcdr rest-llsts))))))
+             (acond ((lcar target-llst)
+                     (lcons it (get-next (lcdr target-llst) rest-llsts))) 
+                    ((lcdr rest-llsts)
+                     (get-next (lcar rest-llsts) it))
+                    (t (lcar rest-llsts)))))
     (get-next)))
 
 #|
