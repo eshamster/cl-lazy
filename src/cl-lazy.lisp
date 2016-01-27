@@ -98,8 +98,8 @@
 @export
 (defun lreverse (llst)
   (labels ((rec (result rest-llst)
-             (if (lcar rest-llst)
-                 (rec (lcons (lcar rest-llst) result) (lcdr rest-llst))
+             (aif (lcar rest-llst)
+                  (rec (lcons it result) (lcdr rest-llst))
                  result)))
     (rec nil llst)))
 
