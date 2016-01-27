@@ -13,13 +13,11 @@
 
 @export
 (defmacro lazy (&body body)
-  (with-gensyms (value evaluated)
-    `(let ((,value nil)
-	   (,evaluated nil))
+  (with-gensyms (value)
+    `(let ((,value nil))
        (lambda ()
-	 (unless ,evaluated
-	   (setf ,value (progn ,@body))
-	   (setf ,evaluated t))
+	 (unless ,value
+	   (setf ,value (progn ,@body)))
 	 ,value))))
 
 @export
