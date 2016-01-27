@@ -105,14 +105,14 @@
 
 @export
 (defun lspan (predicate llst)
-  "Extract from llst until the predication is failed. Value 1 is the extracted lazy list, and value 2 is the rest lazy list"
+  "Extract from llst until the predication is failed. The return value 1 is the extracted lazy list, and the value 2 is the rest lazy list"
   (let (rest)
     (labels ((rec-find (ok rest-llst)
                (if (and rest-llst
                         (funcall predicate (lcar rest-llst)))
-                   (rec-find (lcons (lcar rest-llst) ok) (lcdr rest-llst))
+                   (rec-find (cons (lcar rest-llst) ok) (lcdr rest-llst))
                    (progn (setf rest rest-llst)
-                          (lreverse ok)))))
+                          (list-to-llist (nreverse ok))))))
       (values (rec-find nil llst) rest))))
 
 @export
