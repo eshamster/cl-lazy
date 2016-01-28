@@ -66,12 +66,11 @@
 
 @export
 (defun list-to-llist (lst)
-  (labels ((rec (rest-lst &optional (result nil))
-             (if rest-lst
-                 (rec (cdr rest-lst)
-                      (lcons (car rest-lst) result))
-                 result)))
-    (rec (reverse lst))))
+  (labels ((rec (rest-lst)
+             (when rest-lst
+               (lcons (car rest-lst)
+                      (rec (cdr rest-lst))))))
+    (rec lst)))
 
 @export
 (defun lnth (n l-lst)
