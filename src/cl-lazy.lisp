@@ -44,7 +44,7 @@
 (defmacro llist (&rest rest)
   (llist-body rest))
 
-; (llist-body '(1 2 3) :tail tail) -> (LCONS 1 (LCONS 2 (LCONS 3 tail)))
+;; (llist-body '(1 2 3) :tail tail) -> (LCONS 1 (LCONS 2 (LCONS 3 tail)))
 (defun llist-body (lst &key (tail nil))
   (labels ((f (llst rest-arg)
 	     (if (null rest-arg)
@@ -97,7 +97,7 @@
   (labels ((rec (result rest-llst)
              (aif (lcar rest-llst)
                   (rec (lcons it result) (lcdr rest-llst))
-                 result)))
+                  result)))
     (rec nil llst)))
 
 @export
@@ -129,11 +129,11 @@
 
 #|
 Ex1. Series of even numbers -> [0, 2, 4, 6, ...]
-  (make-series nil #'(lambda (a n) (* n 2)))
+(make-series nil #'(lambda (a n) (* n 2)))
 
 Ex2. Fibonacci series -> [0, 1, 1, 2, 3, 5, 8, 13, ...]
-  (make-series '(0 1) #'(lambda (a n) (+ (lnth (- n 1) a) (lnth (- n 2) a)))
-|#
+(make-series '(0 1) #'(lambda (a n) (+ (lnth (- n 1) a) (lnth (- n 2) a)))
+             |#
 @export
 (defun make-series (init-nums fn-calc)
   (let (a)
@@ -159,7 +159,7 @@ Ex2. Fibonacci series -> [0, 1, 1, 2, 3, 5, 8, 13, ...]
       (lcons (car lst) (recursive-lcons (cdr lst) tail))))
 
 #|-------
-   Utils
+  Utils
   -------|#
 
 @export
@@ -194,10 +194,10 @@ Ex2. Fibonacci series -> [0, 1, 1, 2, 3, 5, 8, 13, ...]
 @export
 (defun filter-series (fn-find series &key (give-up-distance 10000))
   (filter-series-using-little #'(lambda (value a n)
-				   (declare (ignore a n))
-				   (funcall fn-find value))
-			       series
-			       :give-up-distance give-up-distance))
+                                  (declare (ignore a n))
+                                  (funcall fn-find value))
+                              series
+                              :give-up-distance give-up-distance))
 
 @export
 (defun filter-series-using-little (fn-find series &key (give-up-distance 10000))
@@ -231,8 +231,8 @@ Ex2. Fibonacci series -> [0, 1, 1, 2, 3, 5, 8, 13, ...]
     (set-dispatch-macro-character #\# #\[ #'[-reader)
     *readtable*))
 
-; This enables to make a series as
-; #<a[n] = 0, 1, (+ a[n-1] a[n-2])>
+;; This enables to make a series as
+;; #<a[n] = 0, 1, (+ a[n-1] a[n-2])>
 (defun <-reader (stream &rest rest)
   (declare (ignore rest))
   (let ((*readtable* (copy-readtable *readtable*))
@@ -242,7 +242,7 @@ Ex2. Fibonacci series -> [0, 1, 1, 2, 3, 5, 8, 13, ...]
     (set-separate-character #\[)
     (set-separate-character #\])
     (setf buf (read-delimited-list #\= stream t))
-    ; TODO: check #\[ #\]
+                                        ; TODO: check #\[ #\]
     (setf a (car buf))
     (setf n (caddr buf))
 
@@ -284,8 +284,8 @@ Ex2. Fibonacci series -> [0, 1, 1, 2, 3, 5, 8, 13, ...]
   (split-list lst
 	      (position delimiter lst :from-end t)))
 
-; #{a n} -> (lnth n a)
-; #{a n k} -> (lnth k (lnth n a))
+;; #{a n} -> (lnth n a)
+;; #{a n k} -> (lnth k (lnth n a))
 (defun {-reader (stream &rest rest)
   (declare (ignore rest))
   (let ((*readtable* (copy-readtable *readtable*))
@@ -298,13 +298,13 @@ Ex2. Fibonacci series -> [0, 1, 1, 2, 3, 5, 8, 13, ...]
 		   (car lst)
 		   `(lnth ,(car lst) ,(recursive-lnth (cdr lst))))))
       (recursive-lnth (reverse pair)))))
-  
-; Ex. #[n-1] -> (- n 1)
+
+;; Ex. #[n-1] -> (- n 1)
 (defun [-reader (stream &rest rest)
   (declare (ignore rest))
   (let ((lst nil)
 	(*readtable* (copy-readtable *readtable*)))
-    ; TODO: commonize these similar descriptions
+    ;; TODO: commonize these similar descriptions
     (set-separate-character #\-)
     (set-separate-character #\*)
     (set-separate-character #\+)
@@ -319,7 +319,7 @@ Ex2. Fibonacci series -> [0, 1, 1, 2, 3, 5, 8, 13, ...]
 	   (#\/ `(/ ,(car lst) ,(caddr lst)))
 	   (#\* `(* ,(car lst) ,(caddr lst)))))
       (t (error 'simple-error)))))
-  
+
 (defun set-separate-character (char)
   (set-macro-character char
 		       #'(lambda (s c)
