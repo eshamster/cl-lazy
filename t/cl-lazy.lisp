@@ -64,7 +64,9 @@
   (is (llist-to-list (llist 1 2 nil 3) :stops-at-nil nil) '(1 2 nil 3))
   (subtest
       "list-to-llist"
-    (is (llist-to-list (list-to-llist '(1 2 3))) '(1 2 3))))
+    (let ((lst '(1 2 3)))
+      (is (llist-to-list (list-to-llist lst)) '(1 2 3))
+      (is lst '(1 2 3)))))
 
 (defun is-llist (got-llst expected &key (max-length -1))
   (is (llist-to-list got-llst :max-length max-length) expected
