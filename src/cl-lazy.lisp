@@ -14,16 +14,20 @@
 @export
 (defmacro lazy (&body body)
   (with-gensyms (value)
-    `(let ((,value nil))
-       (lambda ()
-	 (unless ,value
-	   (setf ,value (progn ,@body)))
-	 ,value))))
+    (if (and (= (length body) 1)
+             (atom (car body)))
+        (car body)
+        `(let ((,value nil))
+           (lambda ()
+             (unless ,value
+               (setf ,value (progn ,@body)))
+             ,value)))))
 
 @export
 (defun force (lazy-value)
-  (funcall lazy-value))
-
+  (if (functionp lazy-value)
+      (funcall lazy-value)
+      lazy-value))
 
 @export
 (defmacro lcons (a b)
