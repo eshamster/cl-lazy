@@ -7,7 +7,9 @@
 
 ;; NOTE: To run this test file, execute `(asdf:test-system :cl-lazy)' in your Lisp.
 
-(plan 11)
+(enable-series-processing-syntax)
+
+(plan 15)
 
 (subtest
     "Test if it is evaluated only once"
@@ -24,6 +26,15 @@
 (subtest
     "Test lcons, lcar & lcdr"
   (subtest
+      "Test lazy cons cell"
+    (labels ((make-lcons () (lcons (progn (princ "a") 1)
+                                   (progn (princ "b") 2))))
+      (let ((res))
+        (is-print (setf res (lcar (make-lcons))) "a")
+        (is res 1)
+        (is-print (setf res (lcdr (make-lcons))) "ab")
+        (is res 2))))
+  (subtest
       "Test in 2 elements"
     (let ((lst (lcons (progn (princ "a") 1)
 		      (lcons (progn (princ "b") 2) nil)))
@@ -34,7 +45,7 @@
       (is res 2))))
 
 (subtest
-    "Test llist, llist-to-list"
+    "Test llist, llist-to-list, list-to-llist"
   (let ((llst (llist 1 (progn (princ "b") 2) 3))
 	(res nil))
     (is-print (setf res (llist-to-list llst)) "b")
@@ -47,7 +58,62 @@
     (is (llist-to-list llst :max-length  1) '(1))
     (is (llist-to-list llst :max-length  2) '(1 2))
     (is (llist-to-list llst :max-length  3) '(1 2 3))
-    (is (llist-to-list llst :max-length  100) '(1 2 3))))
+    (is (llist-to-list llst :max-length  100) '(1 2 3)))
+
+  (is (llist-to-list (llist 1 2 nil 3)) '(1 2))
+  (is (llist-to-list (llist 1 2 nil 3) :stops-at-nil nil) '(1 2 nil 3))
+  (subtest
+      "list-to-llist"
+    (let ((lst '(1 2 3)))
+      (is (llist-to-list (list-to-llist lst)) '(1 2 3))
+      (is lst '(1 2 3)))))
+
+(defun is-llist (got-llst expected &key (max-length -1))
+  (is (llist-to-list got-llst :max-length max-length) expected
+      :test #'equal))
+
+(subtest
+    "Test lreverse"
+  (is-llist (lreverse (llist 1 2 3))
+            '(3 2 1)))
+
+(subtest
+    "Test lspan"
+  (is (multiple-value-bind (target rest)
+          (lspan (lambda (x) (< x 3)) (llist 1 2 3 2 1))
+        (list (llist-to-list target)
+              (llist-to-list rest)))
+      '((1 2) (3 2 1))
+      :test #'equal)
+  (is (multiple-value-bind (target rest)
+          (lspan (lambda (x) (< x 0)) (llist 1 2 3 2 1))
+        (list (llist-to-list target)
+              (llist-to-list rest)))
+      '(() (1 2 3 2 1))
+      :test #'equal)
+  (is (multiple-value-bind (target rest)
+          (lspan (lambda (x) (< x 100)) (llist 1 2 3 2 1))
+        (list (llist-to-list target)
+              (llist-to-list rest)))
+      '((1 2 3 2 1) ())
+      :test #'equal))
+
+(subtest
+    "Test lappend"
+  (let ((llst (llist 1 2)))
+    (is-llist (lappend llst (llist 3 4))
+              '(1 2 3 4))
+    (is-llist llst '(1 2)))
+  (is-llist (lappend (llist 1 2) (llist 3 4) (llist 5 6))
+            '(1 2 3 4 5 6))
+  (let ((series #<a[n] = (* n 2)>))
+    (is-llist (lappend (llist 100 200) series)
+              '(100 200 0 2)
+              :max-length 4))
+  (labels ((get-next (n)
+             (lappend (llist n)
+                      (get-next (1+ n)))))
+    (is-llist (get-next 0) '(0 1 2 3 4) :max-length 5)))
 
 (subtest
     "Test do-llist"
@@ -64,19 +130,27 @@
     (ok (null (lnth 3 llst)))
     (ok (null (lnth 10 llst)))))
 
-(defun is-series (l-lst test-len expected)
-  (let ((lst nil))
-    (dotimes (i test-len)
-      (setf lst (cons (lnth i l-lst) lst)))
-    (setf lst (reverse lst))
-    (is lst expected :test #'equalp)))
-
 (subtest
-    "Test make-series"
-  (is-series (make-series nil #'(lambda (a n) (declare (ignore a)) (* (1+ n) 2))) 5 '(2 4 6 8 10))
-  (is-series (make-series '(0 1) #'(lambda (a n) (+ (lnth (- n 1) a) (lnth (- n 2) a))))
-	     10
-	     '(0 1 1 2 3 5 8 13 21 34)))
+    "Test series making functions"
+  (subtest
+      "Test make-series"
+    (is-llist (make-series nil (lambda (a n) (declare (ignore a)) (* (1+ n) 2)))
+              '(2 4 6 8 10)
+              :max-length 5)
+    (is-llist (make-series '(0 1) (lambda (a n) (+ (lnth (- n 1) a) (lnth (- n 2) a))))
+              '(0 1 1 2 3 5 8 13 21 34)
+              :max-length 10))
+  (subtest
+      "Test make-simple-series"
+    (is-llist (make-simple-series nil (lambda (n) (* (1+ n) 2))) '(2 4 6 8 10) :max-length 5)
+    (is-llist (make-simple-series '(3 4) (lambda (n) (* n 5))) '(3 4 10 15 20) :max-length 5))
+  (subtest
+      "Test liota"
+    (is-llist (liota) '(0 1 2 3 4) :max-length 5)
+    (is-llist (liota 2) '(2 3 4 5 6) :max-length 5)
+    (is-llist (liota 3 4) '(3 7 11 15 19) :max-length 5)
+    (is-llist (liota 3 1/2) '(3 7/2 4 9/2 5) :max-length 5)
+    (is-llist (liota 2 1 3) '(2 3 4))))
 
 (defparameter *old-table* (enable-series-processing-syntax))
 (subtest
@@ -92,9 +166,9 @@
   (is-expand #{a[n-1]} (lnth (- n 1) a))
   (is-expand #{a[n-1][m]} (lnth m (lnth (- n 1) a)))
   
-  (is-series (make-series '(0 1) #'(lambda (a n) (+ #{a[n-1]} #{a[n-2]})))
-	     10
-	     '(0 1 1 2 3 5 8 13 21 34))
+  (is-llist (make-series '(0 1) #'(lambda (a n) (+ #{a[n-1]} #{a[n-2]})))
+            '(0 1 1 2 3 5 8 13 21 34)
+            :max-length 10)
 
   (subtest
       "Test #<>"
@@ -104,20 +178,26 @@
 	       (make-series (list 0 1) #'(lambda (a n)
 				       (declare (ignorable a n))
 				       (+ (* (lnth (- n 1) a) 2) (lnth (- n 2) a)))))
-    (is-series #<b[k] = 0, 1, (+ b[k-1] b[k-2])>
-	       10
-	       '(0 1 1 2 3 5 8 13 21 34))
+    (is-llist #<b[k] = 0, 1, (+ b[k-1] b[k-2])>
+              '(0 1 1 2 3 5 8 13 21 34)
+              :max-length 10)
     (subtest
 	"Test the format of x[y] can be used in initial values"
       (let ((x #<a[n] = (* (1+ n) 2)>))
-	(is-series #<b[k] = x[0], (* b[k-1] 2)>
-		   5
-		   '(2 4 8 16 32))))))
+	(is-llist #<b[k] = x[0], (* b[k-1] 2)>
+                  '(2 4 8 16 32)
+                  :max-length 5)))))
 
-
-(enable-series-processing-syntax)
 (unwind-protect
-     (progn 
+     (progn
+       (subtest
+	   "Test is-series-end"
+	 (let ((s #<a[n] = 0, 1, nil>))
+	   (ok (not (is-series-end s)))
+	   (ok (not (is-series-end (lnthcdr 1 s))))
+	   (ok (is-series-end (lnthcdr 2 s)))
+	   (ok (is-series-end (lnthcdr 3 s)))))
+       
        (subtest
 	   "Test do-series"
 	 (let ((series1 #<a[n] = (* n 2)>)
@@ -132,30 +212,33 @@
 	 (let ((an #<a[n] = (* n 2)>)
 	       (bn #<a[n] = (* n 3)>)
 	       (cn #<a[n] = (* n 5)>))
-	   (is-series (concat-series #'(lambda (a b c) (list a b c)) an bn cn)
-		      4
-		      '((0 0 0 ) (2 3 5) (4 6 10) (6 9 15)))))
+	   (is-llist (concat-series #'(lambda (a b c) (list a b c)) an bn cn)
+                     '((0 0 0 ) (2 3 5) (4 6 10) (6 9 15))
+                     :max-length 4)))
        (subtest
-	   "Test filter-seires & filter-series-with-little"
-	 (let ((a #<a [n] = n>))
-	   (is-series (filter-series #'oddp a)
-		      5
-		      '(1 3 5 7 9))
-	   (is-series (filter-series
-		       #'(lambda (val)
-			   (= (mod val 100) 20))
-		       a
-		       :give-up-distance 50)
-		      3
-		      '(20 nil nil))
-	   (is-series (filter-series-using-little
-		       #'(lambda (val a n)
-			   (if (= n 0)
-			       (= val 2)
-			       (= (mod val #{a[n-1]}) 0)))
-		       a)
-		      5
-		      '(2 4 8 16 32)))))
+	   "Test filter functions"
+	 (let ((a #<a[n] = n>))
+           (subtest
+               "Test filter-seires"
+             (is-llist (filter-series #'oddp a)
+                       '(1 3 5 7 9)
+                       :max-length 5)
+             (is-error (lnth 2 (filter-series
+                                #'(lambda (val)
+                                    (= (mod val 100) 20))
+                                a
+                                :give-up-distance 50))
+                       'simple-error))
+           (subtest
+               "Test filter-series-using-little"
+             (is-llist (filter-series-using-little
+                        #'(lambda (val a n)
+                            (if (= n 0)
+                                (= val 2)
+                                (= (mod val #{a[n-1]}) 0)))
+                        a)
+                       '(2 4 8 16 32)
+                       :max-length 5)))))
   
   (setf *readtable* *old-table*))
 

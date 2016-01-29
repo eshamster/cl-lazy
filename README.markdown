@@ -1,3 +1,5 @@
+![Build Status](https://circleci.com/gh/eshamster/cl-lazy.png?style=shield)
+
 # Cl-Lazy
 
 ## Usage

@@ -16,7 +16,9 @@
   :version "0.1"
   :author "eshamster"
   :license ""
-  :depends-on (:cl-annot)
+  :depends-on (:cl-annot
+               :anaphora
+               :alexandria)
   :components ((:module "src"
                 :components
                 ((:file "cl-lazy"))))
