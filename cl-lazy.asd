@@ -15,7 +15,7 @@
 (defsystem cl-lazy
   :version "0.1"
   :author "eshamster"
-  :license ""
+  :license "MIT"
   :depends-on (:cl-annot
                :anaphora
                :alexandria)
