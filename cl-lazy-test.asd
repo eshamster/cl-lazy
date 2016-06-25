@@ -10,7 +10,7 @@
 
 (defsystem cl-lazy-test
   :author "eshamster"
-  :license ""
+  :license "MIT"
   :depends-on (:cl-lazy
                :prove)
   :components ((:module "t"

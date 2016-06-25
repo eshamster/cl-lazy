@@ -35,12 +35,11 @@
 
 @export
 (defmacro lcar (l-lst)
-  `(when ,l-lst
-     (force (car ,l-lst))))
+  `(force (car ,l-lst)))
 
 @export
 (defmacro lcdr (l-lst)
-  `(when ,l-lst
+  `(progn
      (force (car ,l-lst))
      (force (cdr ,l-lst))))
 
